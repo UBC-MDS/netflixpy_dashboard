@@ -10,7 +10,6 @@ British Columbia.
 ## Usage / Dependencies
 
 
-
 ## Contributions
 
 1. Anahita Einolghozati
