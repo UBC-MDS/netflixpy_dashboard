@@ -21,6 +21,11 @@ Feedback and suggestions are always welcome! Please read [the contributing
 guidelines](https://github.com/UBC-MDS/group23/blob/main/CONTRIBUTING.md)
 to get started.
 
+## Dashboard Description
+The app contains a landing page that shows the distribution (bar, line or density chart) of movie or TV show release year, country, director and duration. User can filter the plots by selecting a date range and selecting to include movie or TV show or both by clicking the radial button. User can also select multiple countries or directors from dropdown lists for comparison between different countries or directors. As well, by dragging a range of years in the release year plot, the user can further filter the country, director, and duration plots to a smaller subset of data reflecting the selected range of years.
+
+![dashboard_sketch](dashboard_sketch.png)
+
 ## Support
 
 If you run into troubles, please [check the issue
