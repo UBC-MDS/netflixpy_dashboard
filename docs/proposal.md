@@ -13,12 +13,12 @@ To address this issue, we propose to build a data visualization dashboard that a
 We will be visualizing a dataset of 8807 movie or TV shows available on Netflix from 2008 to 2021. The dataset is publicly available on [Kaggle](https://www.kaggle.com/shivamb/netflix-shows). Each Movie/ TV show has 10 associated variables that describe the following:
 
 - `show_id`: Unique Id
-- `type`: Movie or a Tv show
-- `title`: Title of the Movie/ Tv show
+- `type`: Movie or a TV show
+- `title`: Title of the Movie/ TV show
 - `director`: Director name(s)
 - `cast`: Actors names who play a role
 - `country`: Country where the production took place
-- `date_added`: Date the Movie/ Tv show was added on Netflix
+- `date_added`: Date the Movie/ TV show was added on Netflix
 - `release_year`: Release year
 - `rating`: TV rating
 - `duration`: Total duration (in minutes or number of seasons)
