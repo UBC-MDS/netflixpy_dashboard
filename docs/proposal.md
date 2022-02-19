@@ -10,25 +10,25 @@ To address this issue, we propose to build a data visualization dashboard that a
 
 ## Data
 
-We will be visualizing a dataset of 8807 movie or TV shows available on Netflix from 2008 to 2021. The dataset is publicly available on [Kaggle](https://www.kaggle.com/shivamb/netflix-shows). Each Movie/ TV show has 10 associated variables that describe the following:
+We will be visualizing a dataset of 8807 movies or TV shows available on Netflix from 2008 to 2021. The dataset is publicly available on [Kaggle](https://www.kaggle.com/shivamb/netflix-shows). Each Movie/TV show has 10 associated variables that describe the following:
 
 - `show_id`: Unique Id
 - `type`: Movie or a TV show
-- `title`: Title of the Movie/ TV show
+- `title`: Title of the Movie/TV show
 - `director`: Director name(s)
 - `cast`: Actors names who play a role
 - `country`: Country where the production took place
-- `date_added`: Date the Movie/ TV show was added on Netflix
+- `date_added`: Date the Movie/TV show was added on Netflix
 - `release_year`: Release year
 - `rating`: TV rating
 - `duration`: Total duration (in minutes or number of seasons)
 
 ## Research Questions and Usage Scenarios
 
-Tanimose is a new intern at netflix and works in the business strategy division. He is appointed by the team lead to come up with a proposal
-on how to drive the customer's consumption of netflix movies and TV shows based on ratings. The available data lead him to the following ask questions: 
+Tanimose is a new intern at Netflix and works in the business strategy division. He is appointed by the team lead to come up with a proposal
+on how to drive the customer's consumption of Netflix movies and TV shows based on ratings. The available data leads him to the following ask questions:
 
-- Over the years, what new ratings ( TV and movie ratings) were introduced to netflix and how have they increased or decreased?
+- Over the years, what new ratings (TV and movie ratings) were introduced to Netflix, and how have they increased or decreased?
 - How has the average duration of the movies or series in each rating increased over the years?
 - Are there trigger words in the titles of the movies or/and series that have been persistent in ratings?
 
