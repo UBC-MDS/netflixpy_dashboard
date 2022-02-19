@@ -10,7 +10,7 @@ To address this issue, we propose to build a data visualization dashboard that a
 
 ## Data
 
-We will be visualizing a [dataset](https://www.kaggle.com/shivamb/netflix-shows) of 8807 movie or TV shows available on Netflix from 2008 to 2021. Each Movie/ TV show has 10 associated variables that describe the following:
+We will be visualizing a dataset of 8807 movie or TV shows available on Netflix from 2008 to 2021. The dataset is publicly available on [Kaggle](https://www.kaggle.com/shivamb/netflix-shows). Each Movie/ TV show has 10 associated variables that describe the following:
 
 - `show_id`: Unique Id
 - `type`: Movie or a Tv show
