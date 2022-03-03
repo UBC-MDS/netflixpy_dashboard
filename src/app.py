@@ -23,6 +23,37 @@ def plot_hist_duration(type_name, bin_num, title, plot_title):
     ).interactive()
     return chart.to_html()
 
+# frame for movies
+frame_histogram_movies = html.Iframe(
+                        style = {"width": "400px", "height": "320px"} ,
+                        srcDoc=plot_hist_duration(type_name = 'Movie',
+                         bin_num = 30, title = "Duration of Movies",
+                         plot_title= "Histogram of the Duration of Movie"))
+#frame for tv shows
+frame_histogram_tv_shows = html.Iframe(
+                        style = {"width": "400px", "height": "320px"} ,
+                        srcDoc=plot_hist_duration(type_name = 'TV Show',
+                        bin_num = 10, title = "Duration of TV Shows",
+                        plot_title= "Histogram of the Duration of TV Shows"))
+#tabs
+tabs_items = html.Div(
+    children = [
+    dbc.Tabs(
+        id='type_name', 
+        active_tab="Movie",
+        children = [
+                dbc.Tab(frame_histogram_tv_shows, label='Movie'),
+                dbc.Tab(frame_histogram_movies , label='TV Show')
+            ]),
+            
+        html.Div(id="content")
+    ], style = {"color": "#b20710"}) 
+
+@app.callback(
+        Output('content', 'children'),
+        [Input('type_name', 'value')]
+        )
+
 # use the tabs
 app.layout =  dbc.Row(tabs_items)
 
