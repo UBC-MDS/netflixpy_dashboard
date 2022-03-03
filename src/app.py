@@ -53,6 +53,12 @@ tabs_items = html.Div(
         Output('content', 'children'),
         [Input('type_name', 'value')]
         )
+# render tabs
+def render_content(tab):
+    if tab == 'Movie':
+        return frame_histogram_movies
+    elif tab == "TV Show": 
+        return frame_histogram_tv_shows
 
 # use the tabs
 app.layout =  dbc.Row(tabs_items)
