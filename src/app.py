@@ -4,10 +4,39 @@ import dash_bootstrap_components as dbc
 from vega_datasets import data
 import pandas as pd
 
-map_df = pd.read_csv("../data/processed/world_map_data.csv")
 
 def world_map(year):
+    
+    # Load in data and geocodes
+    df = pd.read_csv("../data/raw/netflix_titles.csv")
+    geocodes = pd.read_csv("../data/raw/world_country_latitude_and_longitude_values.csv")
+    
+    # Explode "country" since some shows have multiple countries of production
+    movie_exploded = (df.set_index(df.columns.drop("country", 1)
+                                        .tolist()).country.str.split(',', expand = True)
+                        .stack()
+                        .reset_index()
+                        .rename(columns = {0:'country'})
+                        .loc[:, df.columns]
+    )
 
+    # Remove white space
+    movie_exploded.country = movie_exploded.country.str.lstrip()
+    movie_exploded.country = movie_exploded.country.str.rstrip()
+    
+    # Get count per country and release year
+    count = (pd.DataFrame(movie_exploded.groupby(["country", "release_year"]).size())
+        .reset_index()
+        .rename(columns = {0 : "count"})
+        )
+    
+    # Merge with geocodes
+    count_geocoded = count.merge(geocodes, on = "country")
+    count_geocoded = count_geocoded.rename(columns = {"latitude": "lat", "longitude": "lon"})
+    
+    # Drop unused columns
+    count_geocoded = count_geocoded.drop(["usa_state_code", "usa_state_latitude", "usa_state_longitude", "usa_state"], axis = 1)
+    
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
     base_map = alt.layer(
@@ -16,8 +45,8 @@ def world_map(year):
         'equirectangular'
     ).properties(width = 900, height = 400).configure_view(stroke = None)
     
-    # Count size layer
-    points = alt.Chart(map_df[map_df["release_year"] == year]).mark_point().encode(
+    # Shows count size layer
+    points = alt.Chart(count_geocoded[count_geocoded["release_year"] == year]).mark_point().encode(
     latitude = "lat",
     longitude = "lon",
     fill = alt.value("red"),
@@ -30,7 +59,7 @@ def world_map(year):
 )
     
     chart = (base_map + points).configure_view(
-    strokeWidth=0).configure_mark(
+    strokeWidth = 0).configure_mark(
     opacity = 0.8)
     
     return chart.to_html()
