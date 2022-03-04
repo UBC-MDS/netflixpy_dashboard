@@ -7,8 +7,8 @@ from altair import datum
 
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-
+df = pd.read_csv("data/processed/processed.csv")
+genres_df = pd.read_csv('data/processed/df.csv')
 
 
 def world_map(year):
@@ -17,6 +17,7 @@ def world_map(year):
     df = pd.read_csv("data/raw/netflix_titles.csv")
     geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
     
+
     # Explode "country" since some shows have multiple countries of production
     movie_exploded = (df.set_index(df.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
@@ -42,7 +43,7 @@ def world_map(year):
     
     # Drop unused columns
     count_geocoded = count_geocoded.drop(["usa_state_code", "usa_state_latitude", "usa_state_longitude", "usa_state"], axis = 1)
-    
+
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
     base_map = alt.layer(
@@ -71,10 +72,13 @@ def world_map(year):
     return chart.to_html()
 
 
-def plot_hist_duration(type_name, bin_num, title, plot_title):
-    genres_df = pd.read_csv('data/processed/df.csv')
+def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
+    # filtering data by year and genre
+    plot_df = (genres_df[genres_df["genres"].isin(cat)]
+               .query(f"release_year <= @year"))
+
     alt.data_transformers.enable('data_server')
-    chart = alt.Chart(genres_df, title = plot_title ).mark_bar().encode(
+    chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
         alt.Y('count()'),
         color = alt.value("#b20710")
@@ -85,44 +89,59 @@ def plot_hist_duration(type_name, bin_num, title, plot_title):
     return chart.to_html()
 
 
+def plot_directors(cat, year):
+    click = alt.selection_multi()
+
+    plot_df = (
+        df[df["genres"].isin(cat)]
+        .query("director != 'Missing'")
+        .query(f"release_year <= @year")
+        .groupby(["director", "country"])
+        .show_id.nunique()
+        .reset_index()
+        .sort_values(ascending=False, by="show_id")
+    )
+
+    chart = (
+        alt.Chart(plot_df[0:10], title="Top 10 Directors in terms of number of content")
+        .mark_bar(color="#b20710")
+        .encode(
+            y=alt.Y("director", sort="-x", title=""),
+            x=alt.X("sum(show_id)", title="Number of movies + TV shows"),
+            opacity=alt.condition(click, alt.value(1), alt.value(0.2)),
+            tooltip=[
+                alt.Tooltip("director", title="Director"),
+                alt.Tooltip("sum(show_id)", title="Count"),
+            ],
+        )
+        .add_selection(click)
+    )
+    return chart.to_html()
+
+
+
 app.layout = dbc.Container([
     dbc.Row(html.Div(
         html.H1("Netflix")
     )),
     
     dbc.Row([
-        dbc.Col(dcc.Dropdown(
-                id='genre',
-                value='1', 
-                options=[{'label': "1", 'value': "1"},
-                         {'label': "2", 'value': "2"}]),
-        
-        md=4, style={'border': '1px solid #d3d3d3', 'width': '20%', 'border-radius': '10px'}),
         dbc.Col([
-            html.Div(
-                children = [
-                dbc.Tabs(
-                    id='type_name', 
-                    active_tab="Movie",
-                    children = [
-                            dbc.Tab(html.Iframe(
-                                        style = {"width": "400px", "height": "320px"} ,
-                                        srcDoc=plot_hist_duration(type_name = 'Movie',
-                                                                  bin_num = 30, title = "Duration of Movies",
-                                                                  plot_title= "Histogram of the Duration of Movie")),
-                                                                  label='Movie'),
-                            dbc.Tab(html.Iframe(
-                                        style = {"width": "400px", "height": "320px"} ,
-                                        srcDoc=plot_hist_duration(type_name = 'TV Show',
-                                                                  bin_num = 10, title = "Duration of TV Shows",
-                                                                  plot_title= "Histogram of the Duration of TV Shows")),
-                                                                  label='TV Show')
-                    ]),
-                html.Div(id="content")
-                ], style = {"color": "#b20710"}),
+            html.P("Select Movie/ TV Show genres"),
+            dcc.Dropdown(
+                    id="dropdown",
+                    options=df.genres.unique().tolist(),
+                    value=["International"],
+                    multi=True,
+            )],
+        md=4, style={'border': '1px solid #d3d3d3', 'width': '20%', 'border-radius': '10px'}),
+        
+        
+        dbc.Col([
             dcc.Slider(id = 'year_slider', 
                    min = 1942, 
                    max = 2021, 
+                   value = 2021,
                    step = 5,
                    marks = {
                        1942: "1942",
@@ -144,9 +163,53 @@ app.layout = dbc.Container([
                        2021: "2021"}),
             html.Iframe(
             id = "world_map",
-            srcDoc = world_map(year = 1942),
+            srcDoc = world_map(year = 2021),
             style={'border-width': '0', 'width': '100%', 'height': '500px'}),
-            
+
+            dbc.Row([
+                dbc.Col([
+                    html.Iframe(
+                        id="plot_directors",
+                        srcDoc = plot_directors(["International"], 2021),
+                        style={
+                            "border-width": "1",
+                            "width": "100%",
+                            "height": "300px",
+                            "top": "20%",
+                            "left": "70%",
+                        },
+                    ),    
+                ]),
+                dbc.Col([
+                    html.Div(
+                        children = [
+                        dbc.Tabs(
+                            id='type_name', 
+                            active_tab="Movie",
+                            children = [
+                                    dbc.Tab(html.Iframe(
+                                                id = "movie_duration",
+                                                style = {"width": "400px", "height": "320px"} ,
+                                                srcDoc=plot_hist_duration(type_name = 'Movie',
+                                                                        year = 2021,
+                                                                        cat = ["international"],
+                                                                        bin_num = 30, title = "Duration of Movies",
+                                                                        plot_title= "Duration of Movies")),
+                                                                        label='Movie'),
+                                    dbc.Tab(html.Iframe(
+                                                id = "tv_duration",
+                                                style = {"width": "400px", "height": "320px"} ,
+                                                srcDoc=plot_hist_duration(type_name = 'TV Show',
+                                                                        year = 2021,
+                                                                        cat = ["international"],
+                                                                        bin_num = 10, title = "Duration of TV Shows",
+                                                                        plot_title= "Duration of TV Shows")),
+                                                                        label='TV Show')
+                            ])
+                        ], 
+                    style = {"color": "#b20710"}),
+                ], style = {"width": "60%"})
+            ])             
         ])
     ])
 ])
@@ -154,23 +217,43 @@ app.layout = dbc.Container([
 
 
 
-@app.callback(
-        Output('content', 'children'),
-        [Input('type_name', 'value')]
-        )
-# render tabs
-def render_content(tab):
-    if tab == 'Movie':
-        return frame_histogram_movies
-    elif tab == "TV Show": 
-        return frame_histogram_tv_shows
+# @app.callback(
+#         Output('content', 'children'),
+#         [Input('type_name', 'value')]
+#         )
+# # render tabs
+# def render_content(tab):
+#     if tab == 'Movie':
+#         return frame_histogram_movies
+#     elif tab == "TV Show": 
+#         return frame_histogram_tv_shows
 
 
+
 @app.callback(
-    Output('world_map', 'srcDoc'),
-    Input('year_slider', 'value'))
-def update_output(year):
-    return world_map(year)
+    [Output("world_map", "srcDoc"),
+     Output("plot_directors", "srcDoc"),
+     Output("movie_duration", "srcDoc"),
+     Output("tv_duration", "srcDoc")],
+    [Input("dropdown", "value"),
+    Input('year_slider', 'value')])
+def update_output(cat, year):
+    map = world_map(year)
+    directors = plot_directors(cat, year)
+    movie_hist = plot_hist_duration("Movie",
+                                    year,
+                                    cat, 
+                                    bin_num = 30, 
+                                    title = "Duration of Movies",
+                                    plot_title= "Duration of Movies")
+    tv_show_hist = plot_hist_duration("TV Show",
+                                    year,
+                                    cat,
+                                    bin_num = 10,
+                                    title = "Duration of TV Shows",
+                                    plot_title= "Duration of TV Shows")
+
+    return map, directors, movie_hist, tv_show_hist
 
 
 
