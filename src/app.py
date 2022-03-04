@@ -9,22 +9,18 @@ from altair import datum
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 df = pd.read_csv("data/processed/processed.csv")
 genres_df = pd.read_csv('data/processed/df.csv')
+raw_data = pd.read_csv("data/raw/netflix_titles.csv")
+geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
 
-def world_map(year):
-    
-    # Load in data and geocodes
-    df = pd.read_csv("data/raw/netflix_titles.csv")
-    geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
-    
-
+def process_map_data():
     # Explode "country" since some shows have multiple countries of production
-    movie_exploded = (df.set_index(df.columns.drop("country", 1)
+    movie_exploded = (raw_data.set_index(raw_data.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
                         .stack()
                         .reset_index()
                         .rename(columns = {0:'country'})
-                        .loc[:, df.columns]
+                        .loc[:, raw_data.columns]
     )
 
     # Remove white space
@@ -43,7 +39,12 @@ def world_map(year):
     
     # Drop unused columns
     count_geocoded = count_geocoded.drop(["usa_state_code", "usa_state_latitude", "usa_state_longitude", "usa_state"], axis = 1)
+    return count_geocoded
 
+count_geocoded = process_map_data()
+
+def world_map(year):
+    
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
     base_map = alt.layer(
@@ -263,5 +264,5 @@ def update_output(cat, year):
 
 
 if __name__ == '__main__':
-    app.run_server(debug = True)
+    app.run_server(debug = False)
 
