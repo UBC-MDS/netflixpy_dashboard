@@ -6,7 +6,7 @@ import pandas as pd
 from altair import datum
 
 
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 df = pd.read_csv("data/processed/processed.csv")
 genres_df = pd.read_csv('data/processed/df.csv')
 server = app.server
