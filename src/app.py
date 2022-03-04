@@ -12,6 +12,20 @@ genres_df = pd.read_csv('data/processed/df.csv')
 server = app.server
 
 def world_map(year):
+    """
+    Loads Netflix data and country geocodes, wrangles and merges the two data, 
+    and plots a world map containing the number of movies and TV shows produced in a given year.
+    
+    Parameters
+    ----------
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+        
+    Returns
+    -------
+    altair.vegalite.v4.api.LayerChart
+        A layered Altair chart containing the base world map and the size of number of movies and TV shows produced over the years.
+    """
     
     # Load in data and geocodes
     df = pd.read_csv("data/raw/netflix_titles.csv")
