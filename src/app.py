@@ -9,7 +9,7 @@ from altair import datum
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 df = pd.read_csv("data/processed/processed.csv")
 genres_df = pd.read_csv('data/processed/df.csv')
-
+server = app.server
 
 def world_map(year):
     
