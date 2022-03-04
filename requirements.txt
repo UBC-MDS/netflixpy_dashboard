@@ -7,5 +7,6 @@ altair-viewer==0.3.0
 dash==2.1.0
 dash-core-components==2.0.0
 dash-html-components==2.0.0
+dash_bootstrap_components
 dash-table==5.0.0
 plotly
