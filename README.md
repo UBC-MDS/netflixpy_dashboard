@@ -5,6 +5,15 @@ With the advent of OTT platforms, there has been a gradual shift of audience fro
 To address this issue, we built a data visualization dashboard that allows our target audience to visually and interactively explore a database of movies and TV shows to assess the popular content they need to provide to their viewers. This app provides easy access to information related to types of movies and TV shows available on Netflix. This information could be useful to companies providing online streaming services for creating and designing their content catalog. 
 
 
+## Usage
+The link to the app is ![here](https://dsci-532-netflixpy.herokuapp.com/)
+
+Usage examples:
+- Select genre categories from the side bar to filter the plots by genres.
+- Use the slider on the top of the page to view movie and TV show data throughout the years.
+- Click on the Movie or TV shows tabs to view plots on movie durations.
+
+
 ## Description
 This app contains a landing page that shows the distribution (bar, line or density chart) of the release year, country, director and duration for a movie or TV show.  This app also contains a plot for the number of movies or TV shows over the release year, as well as plots for the number of movies or TV shows for different countries or directors.  Other plots included in this app are plots for the counts of movies or TV shows versus their duration (separate plots for movies and TV shows, where movie duration will be a continuous scale while TV show duration will be a discrete scale).  Users can filter the plots by selecting a date range and selecting to include movies, TV shows, or both by clicking the radial button.  Users also have the option to select multiple countries or directors from dropdown menus for comparison between the number of movies for different countries or directors.  Additionally, by dragging a range of years in the release year plot, users can further filter the country, director, and duration plots to a smaller subset of data reflecting the selected range of years. 
 
@@ -13,15 +22,6 @@ This app contains a landing page that shows the distribution (bar, line or densi
 
 
 ![dashboard_sketch](dashboard_sketch.png)
-
-
-## Usage
-The link to the app is ![here]()
-
-Usage examples:
-- Select genre categories from the side bar to filter the plots by genres.
-- Use the slider on the top of the page to view movie and TV show data throughout the years.
-- Click on the Movie or TV shows tabs to view plots on movie durations.
 
 
 ## Contributions
