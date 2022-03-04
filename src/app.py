@@ -77,11 +77,16 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
     # filtering data by year and genre
     plot_df = (genres_df[genres_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
+    plot_df = (
+        plot_df.groupby(["duration", "type"])
+        .show_id.nunique()
+        .reset_index(name="count")
+    )
 
     alt.data_transformers.enable('data_server')
     chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
-        alt.Y('count()'),
+        alt.Y('count'),
         color = alt.value("#b20710")
     ).transform_filter(datum.type == type_name).properties(
         width=300,
