@@ -8,52 +8,6 @@ from altair import datum
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-#################### DATA WRANGLING DELETE LATER
-df = pd.read_csv('data/raw/netflix_titles.csv')
-genres_series = [str.split(",") for str in df.listed_in.values]
-df['genres'] = genres_series
-genres_df = df.explode('genres')
-genres_df['genres'] = genres_df.genres.str.strip()
-
-cond1 = ((genres_df.genres == 'Anime Features') | (genres_df.genres == 'Anime Series'))
-genres_df.loc[cond1, 'genres'] = 'Anime'
-cond2 = ((genres_df.genres == 'Comedies') | (genres_df.genres == 'TV Comedies'))
-genres_df.loc[cond2, 'genres'] = 'Comedies'
-cond3 = ((genres_df.genres == 'Thrillers') | (genres_df.genres == 'TV Thrillers'))
-genres_df.loc[cond3, 'genres'] = 'Thrillers'
-cond4 = ((genres_df.genres == 'TV Horror') | (genres_df.genres == 'Horror Movies'))
-genres_df.loc[cond4, 'genres'] = 'Horror'
-cond5 = ((genres_df.genres == 'Dramas') | (genres_df.genres == 'TV Dramas'))
-genres_df.loc[cond5, 'genres'] = 'Dramas'
-cond6 = ((genres_df.genres == 'Action & Adventure') | (genres_df.genres == 'TV Action & Adventure'))
-genres_df.loc[cond6, 'genres'] = 'Action & Adventure'
-cond7 = ((genres_df.genres == 'International TV Shows') | (genres_df.genres == 'International Movies'))
-genres_df.loc[cond7, 'genres'] = 'International'
-cond8 = ((genres_df.genres == 'Romantic TV Shows') | (genres_df.genres == 'Romantic Movies'))
-genres_df.loc[cond8, 'genres'] = 'Romantic'
-cond9 = ((genres_df.genres == 'Classic & Cult TV') | (genres_df.genres == 'Classic Movies') | (genres_df.genres == 'Cult Movies'))
-genres_df.loc[cond9, 'genres'] = 'Classic & Cult'
-cond10 = ((genres_df.genres == 'Docuseries') | (genres_df.genres == 'Documentaries'))
-genres_df.loc[cond10, 'genres'] = 'Documentaries'
-
-
-genres_df['date_added'] = pd.to_datetime(genres_df['date_added'])
-genres_df['year'] = genres_df['date_added'].dt.year
-genres_df['month'] = genres_df['date_added'].dt.month
-
-#drop null
-genres_df = genres_df.dropna()
-# remove text from numbers 
-genres_df['duration']  = genres_df['duration'].str.replace("Seasons","") 
-genres_df['duration'] = genres_df['duration'].str.replace("min","")
-genres_df['duration'] = genres_df['duration'].str.replace("Season","")
-
-genres_df['duration'] = genres_df['duration'].astype(int)
-genres_df.to_csv('df.csv')
-######################################################
-
-genres_df = pd.read_csv('df.csv')
-alt.data_transformers.enable('data_server')
 
 
 
@@ -118,6 +72,8 @@ def world_map(year):
 
 
 def plot_hist_duration(type_name, bin_num, title, plot_title):
+    genres_df = pd.read_csv('data/processed/df.csv')
+    alt.data_transformers.enable('data_server')
     chart = alt.Chart(genres_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
         alt.Y('count()'),
@@ -152,13 +108,15 @@ app.layout = dbc.Container([
                             dbc.Tab(html.Iframe(
                                         style = {"width": "400px", "height": "320px"} ,
                                         srcDoc=plot_hist_duration(type_name = 'Movie',
-                                        bin_num = 30, title = "Duration of Movies",
-                                        plot_title= "Histogram of the Duration of Movie")), label='Movie'),
+                                                                  bin_num = 30, title = "Duration of Movies",
+                                                                  plot_title= "Histogram of the Duration of Movie")),
+                                                                  label='Movie'),
                             dbc.Tab(html.Iframe(
                                         style = {"width": "400px", "height": "320px"} ,
                                         srcDoc=plot_hist_duration(type_name = 'TV Show',
-                                        bin_num = 10, title = "Duration of TV Shows",
-                                        plot_title= "Histogram of the Duration of TV Shows")) , label='TV Show')
+                                                                  bin_num = 10, title = "Duration of TV Shows",
+                                                                  plot_title= "Histogram of the Duration of TV Shows")),
+                                                                  label='TV Show')
                     ]),
                 html.Div(id="content")
                 ], style = {"color": "#b20710"}),
