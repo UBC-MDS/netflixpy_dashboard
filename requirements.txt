@@ -10,3 +10,5 @@ dash-html-components==2.0.0
 dash_bootstrap_components
 dash-table==5.0.0
 plotly
+vega-datasets==0.9.0
+numpy==1.19.5
