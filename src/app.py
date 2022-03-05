@@ -106,7 +106,29 @@ def world_map(year):
 
 
 def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
-    # filtering data by year and genre
+    """
+    Plots the distribution of movies or TV series.
+    
+    Parameters
+    ----------
+    type_name: string
+        The name of the required plot category (TV or Movies).
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+    cat: list
+        List of genres we want to filter out from the dataframe.
+    bin_num: int
+        Number of bins in the barplot.
+    title: string
+        The x label of the barplot.
+    plot_title: string
+        The title of the barplot.
+        
+    Returns
+    -------
+    altair.vegalite.v4.api.LayerChart
+        A barplot conditioned on the type of content (TV/Movie)
+    """
     plot_df = (genres_df[genres_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
     plot_df = (
@@ -118,6 +140,7 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
     chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
         alt.Y('count'),
+        tooltip='count',
         color = alt.value("#b20710")
     ).transform_filter(datum.type == type_name).properties(
         width=300,
@@ -127,6 +150,21 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
 
 
 def plot_directors(cat, year):
+    """
+    Plots the count of movies or TV series by individual directors.
+    
+    Parameters
+    ----------
+    cat: list
+        List of genres we want to filter out from the dataframe.\
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+        
+    Returns
+    -------
+    altair.vegalite.v4.api.LayerChart
+        A barplot showing the number of content directed by individuals
+    """
     click = alt.selection_multi()
 
     plot_df = (
@@ -233,7 +271,7 @@ app.layout = dbc.Container([
                                                                         cat = ["international"],
                                                                         bin_num = 30, title = "Duration of Movies",
                                                                         plot_title= "Duration of Movies")),
-                                                                        label='Movie'),
+                                                                        label='Movie', tab_id='Movie'),
                                     dbc.Tab(html.Iframe(
                                                 id = "tv_duration",
                                                 style = {"width": "400px", "height": "320px"} ,
@@ -242,7 +280,7 @@ app.layout = dbc.Container([
                                                                         cat = ["international"],
                                                                         bin_num = 10, title = "Duration of TV Shows",
                                                                         plot_title= "Duration of TV Shows")),
-                                                                        label='TV Show')
+                                                                        label='TV Show', tab_id='TV Show')
                             ])
                         ], 
                     style = {"color": "#b20710"}),
@@ -253,21 +291,6 @@ app.layout = dbc.Container([
 ])
 
 
-
-
-# @app.callback(
-#         Output('content', 'children'),
-#         [Input('type_name', 'value')]
-#         )
-# # render tabs
-# def render_content(tab):
-#     if tab == 'Movie':
-#         return frame_histogram_movies
-#     elif tab == "TV Show": 
-#         return frame_histogram_tv_shows
-
-
-
 @app.callback(
     [Output("world_map", "srcDoc"),
      Output("plot_directors", "srcDoc"),
@@ -275,6 +298,7 @@ app.layout = dbc.Container([
      Output("tv_duration", "srcDoc")],
     [Input("dropdown", "value"),
     Input('year_slider', 'value')])
+
 def update_output(cat, year):
     map = world_map(year)
     directors = plot_directors(cat, year)
