@@ -6,7 +6,7 @@ import pandas as pd
 from altair import datum
 
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 df = pd.read_csv("data/processed/processed.csv")
 genres_df = pd.read_csv('data/processed/df.csv')
 raw_data = pd.read_csv("data/raw/netflix_titles.csv")
@@ -197,8 +197,8 @@ def plot_directors(cat, year):
 
 app.layout = dbc.Container([
     dbc.Row(html.Div(
-        html.H1("Netflix Explorer")
-    )),
+        html.H1("Netflix Explorer"),
+    ), style={"color": "red"}),
     
     dbc.Row([
         dbc.Col([
@@ -206,8 +206,10 @@ app.layout = dbc.Container([
             dcc.Dropdown(
                     id="dropdown",
                     options=df.genres.unique().tolist(),
-                    value=["International"],
+                    value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                     multi=True,
+                    style={'color': 'black'}
+                    ,
             )],
         md=4, style={'border': '1px solid #d3d3d3', 'width': '20%', 'border-radius': '10px'}),
         
@@ -236,7 +238,8 @@ app.layout = dbc.Container([
                        2007: "2007",
                        2012: "2012",
                        2017: "2017",
-                       2021: "2021"}),
+                       2021: "2021"},
+                   ),
             html.Iframe(
             id = "world_map",
             srcDoc = world_map(year = 2021),
@@ -246,7 +249,7 @@ app.layout = dbc.Container([
                 dbc.Col([
                     html.Iframe(
                         id="plot_directors",
-                        srcDoc = plot_directors(["International"], 2021),
+                        srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
                         style={
                             "border-width": "1",
                             "width": "100%",
@@ -268,7 +271,7 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'Movie',
                                                                         year = 2021,
-                                                                        cat = ["international"],
+                                                                        cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                                                         bin_num = 30, title = "Duration of Movies",
                                                                         plot_title= "Duration of Movies")),
                                                                         label='Movie', tab_id='Movie'),
@@ -277,7 +280,7 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'TV Show',
                                                                         year = 2021,
-                                                                        cat = ["international"],
+                                                                        cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                                                         bin_num = 10, title = "Duration of TV Shows",
                                                                         plot_title= "Duration of TV Shows")),
                                                                         label='TV Show', tab_id='TV Show')
