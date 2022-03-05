@@ -9,7 +9,10 @@ from altair import datum
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 df = pd.read_csv("data/processed/processed.csv")
 genres_df = pd.read_csv('data/processed/df.csv')
+raw_data = pd.read_csv("data/raw/netflix_titles.csv")
+geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
+
 
 def world_map(year):
     """
@@ -33,12 +36,12 @@ def world_map(year):
     
 
     # Explode "country" since some shows have multiple countries of production
-    movie_exploded = (df.set_index(df.columns.drop("country", 1)
+    movie_exploded = (raw_data.set_index(raw_data.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
                         .stack()
                         .reset_index()
                         .rename(columns = {0:'country'})
-                        .loc[:, df.columns]
+                        .loc[:, raw_data.columns]
     )
 
     # Remove white space
@@ -63,6 +66,7 @@ def world_map(year):
                                           "usa_state_longitude", 
                                           "usa_state"], axis = 1)
 
+    
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
     base_map = alt.layer(
@@ -97,8 +101,7 @@ def world_map(year):
         ).configure_mark(
             opacity = 0.8).configure_title(
                             dy = -20
-)
-        
+) 
     return chart.to_html()
 
 
@@ -106,11 +109,16 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
     # filtering data by year and genre
     plot_df = (genres_df[genres_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
+    plot_df = (
+        plot_df.groupby(["duration", "type"])
+        .show_id.nunique()
+        .reset_index(name="count")
+    )
 
     alt.data_transformers.enable('data_server')
     chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
-        alt.Y('count()'),
+        alt.Y('count'),
         color = alt.value("#b20710")
     ).transform_filter(datum.type == type_name).properties(
         width=300,
@@ -289,5 +297,5 @@ def update_output(cat, year):
 
 
 if __name__ == '__main__':
-    app.run_server(debug = True)
+    app.run_server(debug = False)
 
