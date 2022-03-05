@@ -115,7 +115,6 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
         .reset_index(name="count")
     )
 
-    alt.data_transformers.enable('data_server')
     chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
         alt.Y('count'),
