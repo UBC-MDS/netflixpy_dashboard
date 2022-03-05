@@ -13,7 +13,28 @@ raw_data = pd.read_csv("data/raw/netflix_titles.csv")
 geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
 
-def process_map_data():
+
+def world_map(year):
+    """
+    Loads Netflix data and country geocodes, wrangles and merges the two data, 
+    and plots a world map containing the number of movies and TV shows produced in a given year.
+    
+    Parameters
+    ----------
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+        
+    Returns
+    -------
+    altair.vegalite.v4.api.LayerChart
+        A layered Altair chart containing the base world map and the size of number of movies and TV shows produced over the years.
+    """
+    
+    # Load in data and geocodes
+    df = pd.read_csv("data/raw/netflix_titles.csv")
+    geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
+    
+
     # Explode "country" since some shows have multiple countries of production
     movie_exploded = (raw_data.set_index(raw_data.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
@@ -28,30 +49,35 @@ def process_map_data():
     movie_exploded.country = movie_exploded.country.str.rstrip()
     
     # Get count per country and release year
-    count = (pd.DataFrame(movie_exploded.groupby(["country", "release_year"]).size())
+    count = (pd.DataFrame(movie_exploded.groupby(["country", 
+                                                  "release_year"]).size())
         .reset_index()
         .rename(columns = {0 : "count"})
         )
     
     # Merge with geocodes
     count_geocoded = count.merge(geocodes, on = "country")
-    count_geocoded = count_geocoded.rename(columns = {"latitude": "lat", "longitude": "lon"})
+    count_geocoded = count_geocoded.rename(columns = {"latitude": "lat", 
+                                                      "longitude": "lon"})
     
     # Drop unused columns
-    count_geocoded = count_geocoded.drop(["usa_state_code", "usa_state_latitude", "usa_state_longitude", "usa_state"], axis = 1)
-    return count_geocoded
+    count_geocoded = count_geocoded.drop(["usa_state_code", 
+                                          "usa_state_latitude", 
+                                          "usa_state_longitude", 
+                                          "usa_state"], axis = 1)
 
-count_geocoded = process_map_data()
-
-def world_map(year):
     
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
     base_map = alt.layer(
-        alt.Chart(source).mark_geoshape(fill = 'black', stroke = 'grey')
+        alt.Chart(source).mark_geoshape(
+            fill = 'black', 
+            stroke = 'grey')
     ).project(
         'equirectangular'
-    ).properties(width = 900, height = 400).configure_view(stroke = None)
+    ).properties(width = 900, 
+                 height = 400).configure_view(
+                     stroke = None)
     
     # Shows count size layer
     points = alt.Chart(count_geocoded[count_geocoded["release_year"] == year]).mark_point().encode(
@@ -63,13 +89,19 @@ def world_map(year):
                    legend = None),
 
     stroke = alt.value(None),
-    tooltip = ["country", "release_year:Q" ,"count:Q"]
+    tooltip = [alt.Tooltip("country", title = "Country"), 
+               alt.Tooltip("release_year:Q", title = "Release Year"),
+               alt.Tooltip("count:Q", title = "Count")]
+).properties(
+    title = "Number of Movie and TV show Produced Worldwide"
 )
     
     chart = (base_map + points).configure_view(
-    strokeWidth = 0).configure_mark(
-    opacity = 0.8)
-    
+        strokeWidth = 0
+        ).configure_mark(
+            opacity = 0.8).configure_title(
+                            dy = -20
+) 
     return chart.to_html()
 
 
@@ -109,11 +141,11 @@ def plot_directors(cat, year):
     )
 
     chart = (
-        alt.Chart(plot_df[0:10], title="Top 10 Directors in terms of number of content")
+        alt.Chart(plot_df[0:10], title="Top 10 Directors in Terms of Number of Content")
         .mark_bar(color="#b20710")
         .encode(
             y=alt.Y("director", sort="-x", title=""),
-            x=alt.X("sum(show_id)", title="Number of movies + TV shows"),
+            x=alt.X("sum(show_id)", title="Number of Movies + TV shows"),
             opacity=alt.condition(click, alt.value(1), alt.value(0.2)),
             tooltip=[
                 alt.Tooltip("director", title="Director"),
@@ -128,7 +160,7 @@ def plot_directors(cat, year):
 
 app.layout = dbc.Container([
     dbc.Row(html.Div(
-        html.H1("Netflix")
+        html.H1("Netflix Explorer")
     )),
     
     dbc.Row([
@@ -144,6 +176,7 @@ app.layout = dbc.Container([
         
         
         dbc.Col([
+            html.P("Select Year"),
             dcc.Slider(id = 'year_slider', 
                    min = 1942, 
                    max = 2021, 
@@ -170,7 +203,7 @@ app.layout = dbc.Container([
             html.Iframe(
             id = "world_map",
             srcDoc = world_map(year = 2021),
-            style={'border-width': '0', 'width': '100%', 'height': '500px'}),
+            style={'border-width': '0', 'width': '90%', 'height': '500px'}),
 
             dbc.Row([
                 dbc.Col([
@@ -256,7 +289,7 @@ def update_output(cat, year):
                                     year,
                                     cat,
                                     bin_num = 10,
-                                    title = "Duration of TV Shows",
+                                    title = "Number of Seasons",
                                     plot_title= "Duration of TV Shows")
 
     return map, directors, movie_hist, tv_show_hist
