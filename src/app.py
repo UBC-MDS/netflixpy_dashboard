@@ -12,6 +12,7 @@ genres_df = pd.read_csv('data/processed/df.csv')
 raw_data = pd.read_csv("data/raw/netflix_titles.csv")
 geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
+app.title = 'Netflix Dashboard'
 
 
 def world_map(year):
