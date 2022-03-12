@@ -40,16 +40,22 @@ If you would like to help contribute to the app, you can set up the system as fo
 1. Download the necessary packages listed in `requirements.txt` using `pip` or `conda`
 2. Clone this repo using `https://github.com/UBC-MDS/netflixpy_dashboard.git`
 
-To run the app locally:
+### To run the app locally:
 1. Navigate to the root of this repo
 2. In the command line, enter
-
 ```
 python src/app.py
 ```
-
 3. Copy the address printed out after "Dash is running on" to a browser to view the Dash app.
 
+### To run the app locally using Docker:
+This dashboard can be run locally using Docker. Ensure that the Docker desktop application is open. Then, follow these steps:
+1. Navigate to the root of this repo
+2. In the command line, enter
+```
+docker-compose up
+```
+3. The local Docker build can then be accessed by navigating to http://localhost:8000/ in a web browser.
 
 ## Support
 
