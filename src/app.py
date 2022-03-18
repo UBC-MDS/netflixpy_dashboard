@@ -244,6 +244,7 @@ app.layout = dbc.Container([
         
         
         dbc.Col([
+            html.H3("Movie and TV shows produced", style={}),
             html.Iframe(
             id = "world_map",
             srcDoc = world_map(year = 2021),
