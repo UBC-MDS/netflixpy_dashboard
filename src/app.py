@@ -205,13 +205,8 @@ def plot_directors(cat,rate, year):
     return chart.to_html()
 
 transparent = "#00000000"        # for transparent backgrounds
-color1 = "#9E0600"               # red
-color2 = "#993535"               # border colors
-plot_text_color = "#ebe8e8"      # plot axis and label color
-title_color = "#ebe8e8"          # general title and text color
-border_radius = "5px"            # rounded corner radius
-border_width = "3px"             # border width
-
+color1 = "#993535"               # red
+color2 = "#e3d6d5"               # border colors
 
 app.layout = dbc.Container([
     dbc.Row(html.Div(
@@ -220,9 +215,7 @@ app.layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([
-            html.P("Select Year",
-                style={"background": color1, "color": title_color,
-                    'textAlign': 'center', 'border-radius': border_radius}),
+            html.P(" Select Year", style={"background": color1, 'border-radius': '5px'}),
             html.Div([
                 html.Div(style={'padding': 3}),
                 dcc.Slider(id = 'year_slider', 
@@ -248,66 +241,40 @@ app.layout = dbc.Container([
                         2012: "2012",
                         2017: "2017",
                         2021: "2021"},
-                   )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
+                   )], style={"border": f"1px solid {color2}"}),
             html.Div(style={'padding': 10}),
-
-            html.P("Select Genres",
-                style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
-            html.Div([
-                dcc.Dropdown(
-                        id="dropdown",
-                        options=df.genres.unique().tolist(),
-                        value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
-
-                        multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
-                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
+            html.P(" Select Movie/ TV Show genres", style={"background": color1, 'border-radius': '5px'}),
+            dcc.Dropdown(
+                    id="dropdown",
+                    options=df.genres.unique().tolist(),
+                    value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                    multi=True,
+                    style={"background-color": "#00000000", "color": "black", "label-color": "black"}
+                    ,
             ),
             html.Div(style={'padding': 10}),
-
-            html.P("Select Ratings",
-                style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
-            html.Div([
-                dcc.Dropdown(
-                        id="dropdown_ratings",
-                        options=df.rating.unique().tolist(),
-                        value=   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-
-                        multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
-                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
-            )
-                       ],
+            html.P(" Select Ratings", style={"background": color1, 'border-radius': '5px'})],
         md=4, style={'width': '17%'}),   
         
         
         dbc.Col([
-            html.H3("Movies and TV shows produced worldwide",
-                style={"background": color1,"color": title_color, 
-                       'textAlign': 'center', 'border-radius': border_radius, "width": "93%"}),
+            html.H3(" Movie and TV shows produced", style={"background": color1, 'border-radius': '5px', "width": "93%"}),
             html.Div([
                 html.Iframe(
                 id = "world_map",
                 srcDoc = world_map(year = 2021),
                 style={'border': '0', 'width': '100%', 'height': '500px'})
-            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "93%", "height": "470px"}),
+            ], style={"border": f"1px solid {color2}", "width": "93%"}),
 
             html.Div(style={'padding': 10}),
             dbc.Row([
                 dbc.Col([
-                    html.H3("Top 10 directors",
-                        style={"background": color1, "color": title_color, 
-                               'textAlign': 'center', 'border-radius': border_radius}),
+                    html.H3(" Top 10 directors", style={"background": color1, 'border-radius': '5px'}),
                     html.Div([
-                        html.P("In terms of number of content",
-                               style={"color": title_color, 'textAlign': 'center'}),
+                        html.P("In terms of number of content", style={}),
                         html.Iframe(
                             id="plot_directors",
-                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
-                                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-                                                          2021),
+                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
                             style={
                                 "border-width": "1",
                                 "width": "100%",
@@ -316,12 +283,10 @@ app.layout = dbc.Container([
                                 "left": "70%",
                             },
                         ),   
-                    ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "height": "300px"})
+                    ], style={"border": f"1px solid {color2}"})
                 ], md=4, style={"width": "54%"}),
                 dbc.Col([
-                    html.H3("Durations",
-                        style={"background": color1, "color": title_color, 
-                               "textAlign": "center", "border-radius": border_radius, "width": "120%"}),
+                    html.H3(" Durations", style={"background": color1, 'border-radius': '5px', "width": "120%"}),
                     html.Div(
                         children = [
                         dbc.Tabs(
@@ -350,7 +315,7 @@ app.layout = dbc.Container([
                                                                         label='TV Show', tab_id='TV Show')
                             ])
                         ], 
-                    style = {"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "120%", "height": "300px"}),
+                    style = {"border": f"1px solid {color2}", "color": "#b20710", "width": "120%", "height": "350px"}),
                 ], md=4, style = {})
             ])             
         ])
