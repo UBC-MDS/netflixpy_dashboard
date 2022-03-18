@@ -270,7 +270,7 @@ app.layout = dbc.Container([
 
             html.P("Select Year",
                 style={"background": color1, "color": title_color,
-                    'textAlign': 'center', 'border-radius': border_radius}),
+                    'textAlign': 'center', 'border-radius': border_radius, "margin-top": "15px"}),
             html.Div([
                 html.Div(style={'padding': 3}),
                 dcc.Slider(id = 'year_slider', 
