@@ -230,6 +230,7 @@ app.layout = dbc.Container([
                 dbc.PopoverBody(app_desc),
                 target="popover-target",
                 trigger="legacy",
+                placement="bottom"
             )
         ]),
     ]),    
