@@ -203,6 +203,7 @@ app.layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([
+            html.Div(style={'padding': 10}),
             html.P("Select Year", style={}),
             dcc.Slider(id = 'year_slider', 
                    min = 1942, 
@@ -265,7 +266,7 @@ app.layout = dbc.Container([
                             "left": "70%",
                         },
                     ),    
-                ], md=4, style={"width": "53%"}),
+                ], md=4, style={"width": "54%"}),
                 dbc.Col([
                     html.H3("Durations", style={}),
                     html.Div(
