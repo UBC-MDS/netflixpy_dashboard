@@ -203,7 +203,7 @@ def plot_directors(cat, year):
     return chart.to_html()
 
 transparent = "#00000000"        # for transparent backgrounds
-color1 = "#99221d"               # red
+color1 = "#9E0600"               # red
 color2 = "#993535"               # border colors
 plot_text_color = "#ebe8e8"      # plot axis and label color
 title_color = "#ebe8e8"          # general title and text color

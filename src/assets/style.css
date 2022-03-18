@@ -10,7 +10,7 @@
 }
 
 .rc-slider-handle{
-    background-color: #99221d;
+    background-color: #9E0600;
     border-color:black;
 }
 
@@ -23,7 +23,7 @@
 }
   
 .rc-slider-dot-active {
-    background-color: #99110c;  
+    background-color: #9E0600;  
     border: solid 1px #000000;
 }
   
