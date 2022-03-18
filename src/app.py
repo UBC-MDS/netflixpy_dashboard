@@ -106,7 +106,7 @@ def world_map(year):
     return chart.to_html()
 
 
-def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
+def plot_hist_duration(type_name, year, cat, bin_num, title):
     """
     Plots the distribution of movies or TV series.
     
@@ -138,14 +138,18 @@ def plot_hist_duration(type_name, year, cat, bin_num, title, plot_title):
         .reset_index(name="count")
     )
 
-    chart = alt.Chart(plot_df, title = plot_title ).mark_bar().encode(
+    chart = alt.Chart(plot_df).mark_bar().encode(
         alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
         alt.Y('count'),
         tooltip='count',
-        color = alt.value("#b20710")
+        color = alt.value(color1)
     ).transform_filter(datum.type == type_name).properties(
         width=300,
         height=200
+    ).configure(background=transparent
+    ).configure_axis(
+        labelColor=plot_text_color,
+        titleColor=plot_text_color
     ).interactive()
     return chart.to_html()
 
@@ -179,8 +183,8 @@ def plot_directors(cat, year):
     )
 
     chart = (
-        alt.Chart(plot_df[0:10], title="Top 10 Directors in Terms of Number of Content")
-        .mark_bar(color="#b20710")
+        alt.Chart(plot_df[0:10])
+        .mark_bar(color=color1)
         .encode(
             y=alt.Y("director", sort="-x", title=""),
             x=alt.X("sum(show_id)", title="Number of Movies + TV shows"),
@@ -191,12 +195,18 @@ def plot_directors(cat, year):
             ],
         )
         .add_selection(click)
+    ).configure(background=transparent
+    ).configure_axis(
+        labelColor=plot_text_color,
+        titleColor=plot_text_color
     )
     return chart.to_html()
 
 transparent = "#00000000"        # for transparent backgrounds
 color1 = "#993535"               # red
 color2 = "#e3d6d5"               # border colors
+plot_text_color = "white"        # plot axis and label color
+
 
 app.layout = dbc.Container([
     dbc.Row(html.Div(
@@ -233,13 +243,13 @@ app.layout = dbc.Container([
                         2021: "2021"},
                    )], style={"border": f"1px solid {color2}"}),
             html.Div(style={'padding': 10}),
-            html.P(" Select Movie/ TV Show genres", style={"background": color1, 'border-radius': '5px'}),
+            html.P(" Select genres", style={"background": color1, 'border-radius': '5px'}),
             dcc.Dropdown(
                     id="dropdown",
                     options=df.genres.unique().tolist(),
                     value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                     multi=True,
-                    style={"background-color": "#00000000", "color": "black", "label-color": "black"}
+                    style={"background-color": transparent, "color": "black", "label-color": "black"}
                     ,
             ),
             html.Div(style={'padding': 10}),
@@ -248,13 +258,13 @@ app.layout = dbc.Container([
         
         
         dbc.Col([
-            html.H3(" Movie and TV shows produced", style={"background": color1, 'border-radius': '5px', "width": "93%"}),
+            html.H3(" Movie and TV shows produced worldwide", style={"background": color1, 'border-radius': '5px', "width": "93%"}),
             html.Div([
                 html.Iframe(
                 id = "world_map",
                 srcDoc = world_map(year = 2021),
                 style={'border': '0', 'width': '100%', 'height': '500px'})
-            ], style={"border": f"1px solid {color2}", "width": "93%"}),
+            ], style={"border": f"1px solid {color2}", "width": "93%", "height": "470px"}),
 
             html.Div(style={'padding': 10}),
             dbc.Row([
@@ -273,7 +283,7 @@ app.layout = dbc.Container([
                                 "left": "70%",
                             },
                         ),   
-                    ], style={"border": f"1px solid {color2}"})
+                    ], style={"border": f"1px solid {color2}", "height": "300px"})
                 ], md=4, style={"width": "54%"}),
                 dbc.Col([
                     html.H3(" Durations", style={"background": color1, 'border-radius': '5px', "width": "120%"}),
@@ -289,8 +299,8 @@ app.layout = dbc.Container([
                                                 srcDoc=plot_hist_duration(type_name = 'Movie',
                                                                         year = 2021,
                                                                         cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
-                                                                        bin_num = 30, title = "Duration of Movies",
-                                                                        plot_title= "Duration of Movies")),
+                                                                        bin_num = 30, title = "Duration of Movies"
+                                                                        )),
                                                                         label='Movie', tab_id='Movie'),
                                     dbc.Tab(html.Iframe(
                                                 id = "tv_duration",
@@ -298,12 +308,12 @@ app.layout = dbc.Container([
                                                 srcDoc=plot_hist_duration(type_name = 'TV Show',
                                                                         year = 2021,
                                                                         cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
-                                                                        bin_num = 10, title = "Duration of TV Shows",
-                                                                        plot_title= "Duration of TV Shows")),
+                                                                        bin_num = 10, title = "Duration of TV Shows"
+                                                                        )),
                                                                         label='TV Show', tab_id='TV Show')
                             ])
                         ], 
-                    style = {"border": f"1px solid {color2}", "color": "#b20710", "width": "120%", "height": "350px"}),
+                    style = {"border": f"1px solid {color2}", "width": "120%", "height": "300px"}),
                 ], md=4, style = {})
             ])             
         ])
@@ -326,14 +336,14 @@ def update_output(cat, year):
                                     year,
                                     cat, 
                                     bin_num = 30, 
-                                    title = "Duration of Movies",
-                                    plot_title= "Duration of Movies")
+                                    title = "Duration of Movies"
+                                    )
     tv_show_hist = plot_hist_duration("TV Show",
                                     year,
                                     cat,
                                     bin_num = 10,
-                                    title = "Number of Seasons",
-                                    plot_title= "Duration of TV Shows")
+                                    title = "Number of Seasons"
+                                    )
 
     return map, directors, movie_hist, tv_show_hist
 
