@@ -12,6 +12,7 @@ genres_df = pd.read_csv('data/processed/df.csv')
 raw_data = pd.read_csv("data/raw/netflix_titles.csv")
 geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
+app.title = 'Netflix Dashboard'
 
 
 def world_map(year):
@@ -202,20 +203,7 @@ app.layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([
-            html.P("Select Movie/ TV Show genres"),
-            dcc.Dropdown(
-                    id="dropdown",
-                    options=df.genres.unique().tolist(),
-                    value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
-                    multi=True,
-                    style={'color': 'black'}
-                    ,
-            )],
-        md=4, style={'border': '1px solid #d3d3d3', 'width': '20%', 'border-radius': '10px'}),
-        
-        
-        dbc.Col([
-            html.P("Select Year"),
+            html.P("Select Year", style={}),
             dcc.Slider(id = 'year_slider', 
                    min = 1942, 
                    max = 2021, 
@@ -240,13 +228,32 @@ app.layout = dbc.Container([
                        2017: "2017",
                        2021: "2021"},
                    ),
+            html.Div(style={'padding': 10}),
+            html.P("Select Movie/ TV Show genres", style={}),
+            dcc.Dropdown(
+                    id="dropdown",
+                    options=df.genres.unique().tolist(),
+                    value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                    multi=True,
+                    style={"background-color": "#00000000", "color": "black", "label-color": "black"}
+                    ,
+            ),
+            html.Div(style={'padding': 10}),
+            html.P("Select Ratings", style={})],
+        md=4, style={'border': '1px solid #d3d3d3', 'width': '17%', 'border-radius': '10px'}),
+        
+        
+        dbc.Col([
+            html.H3("Movie and TV shows produced", style={}),
             html.Iframe(
             id = "world_map",
             srcDoc = world_map(year = 2021),
-            style={'border-width': '0', 'width': '90%', 'height': '500px'}),
+            style={'border-width': '0', 'width': '100%', 'height': '500px'}),
 
             dbc.Row([
                 dbc.Col([
+                    html.H3("Top 10 directors", style={}),
+                    html.P("In terms of number of content", style={}),
                     html.Iframe(
                         id="plot_directors",
                         srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
@@ -258,8 +265,9 @@ app.layout = dbc.Container([
                             "left": "70%",
                         },
                     ),    
-                ]),
+                ], md=4, style={"width": "53%"}),
                 dbc.Col([
+                    html.H3("Durations", style={}),
                     html.Div(
                         children = [
                         dbc.Tabs(
@@ -287,7 +295,7 @@ app.layout = dbc.Container([
                             ])
                         ], 
                     style = {"color": "#b20710"}),
-                ], style = {"width": "60%"})
+                ], md=4)
             ])             
         ])
     ])
