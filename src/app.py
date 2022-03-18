@@ -194,43 +194,46 @@ def plot_directors(cat, year):
     )
     return chart.to_html()
 
-
+transparent = "#00000000"        # for transparent backgrounds
+color1 = "#993535"               # red
+color2 = "#e3d6d5"               # border colors
 
 app.layout = dbc.Container([
     dbc.Row(html.Div(
         html.H1("Netflix Explorer"),
-    ), style={"color": "red"}),
+    ), style={"color": color1}),
     
     dbc.Row([
         dbc.Col([
+            html.P(" Select Year", style={"background": color1, 'border-radius': '5px'}),
+            html.Div([
+                html.Div(style={'padding': 3}),
+                dcc.Slider(id = 'year_slider', 
+                    min = 1942, 
+                    max = 2021, 
+                    value = 2021,
+                    step = 5,
+                    marks = {
+                        1942: "1942",
+                        1947: "1947",
+                        1952: "1952",
+                        1957: "1957",
+                        1962: "1962",
+                        1967: "1967",
+                        1972: "1972",
+                        1977: "1977",
+                        1982: "1982",
+                        1987: "1987",
+                        1992: "1992",
+                        1997: "1997",
+                        2002: "2002",
+                        2007: "2007",
+                        2012: "2012",
+                        2017: "2017",
+                        2021: "2021"},
+                   )], style={"border": f"1px solid {color2}"}),
             html.Div(style={'padding': 10}),
-            html.P("Select Year", style={}),
-            dcc.Slider(id = 'year_slider', 
-                   min = 1942, 
-                   max = 2021, 
-                   value = 2021,
-                   step = 5,
-                   marks = {
-                       1942: "1942",
-                       1947: "1947",
-                       1952: "1952",
-                       1957: "1957",
-                       1962: "1962",
-                       1967: "1967",
-                       1972: "1972",
-                       1977: "1977",
-                       1982: "1982",
-                       1987: "1987",
-                       1992: "1992",
-                       1997: "1997",
-                       2002: "2002",
-                       2007: "2007",
-                       2012: "2012",
-                       2017: "2017",
-                       2021: "2021"},
-                   ),
-            html.Div(style={'padding': 10}),
-            html.P("Select Movie/ TV Show genres", style={}),
+            html.P(" Select Movie/ TV Show genres", style={"background": color1, 'border-radius': '5px'}),
             dcc.Dropdown(
                     id="dropdown",
                     options=df.genres.unique().tolist(),
@@ -240,35 +243,40 @@ app.layout = dbc.Container([
                     ,
             ),
             html.Div(style={'padding': 10}),
-            html.P("Select Ratings", style={})],
-        md=4, style={'border': '1px solid #d3d3d3', 'width': '17%', 'border-radius': '10px'}),
+            html.P(" Select Ratings", style={"background": color1, 'border-radius': '5px'})],
+        md=4, style={'width': '17%'}),   
         
         
         dbc.Col([
-            html.H3("Movie and TV shows produced", style={}),
-            html.Iframe(
-            id = "world_map",
-            srcDoc = world_map(year = 2021),
-            style={'border-width': '0', 'width': '100%', 'height': '500px'}),
+            html.H3(" Movie and TV shows produced", style={"background": color1, 'border-radius': '5px', "width": "93%"}),
+            html.Div([
+                html.Iframe(
+                id = "world_map",
+                srcDoc = world_map(year = 2021),
+                style={'border': '0', 'width': '100%', 'height': '500px'})
+            ], style={"border": f"1px solid {color2}", "width": "93%"}),
 
+            html.Div(style={'padding': 10}),
             dbc.Row([
                 dbc.Col([
-                    html.H3("Top 10 directors", style={}),
-                    html.P("In terms of number of content", style={}),
-                    html.Iframe(
-                        id="plot_directors",
-                        srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
-                        style={
-                            "border-width": "1",
-                            "width": "100%",
-                            "height": "300px",
-                            "top": "20%",
-                            "left": "70%",
-                        },
-                    ),    
+                    html.H3(" Top 10 directors", style={"background": color1, 'border-radius': '5px'}),
+                    html.Div([
+                        html.P("In terms of number of content", style={}),
+                        html.Iframe(
+                            id="plot_directors",
+                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
+                            style={
+                                "border-width": "1",
+                                "width": "100%",
+                                "height": "300px",
+                                "top": "20%",
+                                "left": "70%",
+                            },
+                        ),   
+                    ], style={"border": f"1px solid {color2}"})
                 ], md=4, style={"width": "54%"}),
                 dbc.Col([
-                    html.H3("Durations", style={}),
+                    html.H3(" Durations", style={"background": color1, 'border-radius': '5px', "width": "120%"}),
                     html.Div(
                         children = [
                         dbc.Tabs(
@@ -295,8 +303,8 @@ app.layout = dbc.Container([
                                                                         label='TV Show', tab_id='TV Show')
                             ])
                         ], 
-                    style = {"color": "#b20710"}),
-                ], md=4)
+                    style = {"border": f"1px solid {color2}", "color": "#b20710", "width": "120%", "height": "350px"}),
+                ], md=4, style = {})
             ])             
         ])
     ])
