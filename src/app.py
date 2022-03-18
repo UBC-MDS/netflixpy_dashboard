@@ -219,7 +219,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
         html.H1("🎥 Netflix Explorer", style={"font-weight": "bold"}),
-        ], md=4, style={"color": "#E50914", "width": "32%"}), 
+        ], md=4, style={"color": "#E50914", "width": "33.5%"}), 
         
         dbc.Col([
             dbc.Button(
