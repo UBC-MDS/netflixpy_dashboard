@@ -1,0 +1,36 @@
+.Select--multi .Select-value {
+    background-color: rgba(135, 173, 135, 0);
+    border-color: #ffffff00;
+    color: rgb(228, 222, 222);
+}
+
+.Select--multi .Select-menu-outer {
+    background-color: rgb(29, 27, 27);
+    color: rgb(230, 228, 228);
+}
+
+.rc-slider-handle{
+    background-color: #9E0600;
+    border-color:black;
+}
+
+.rc-slider-handle:hover {
+    border-color: rgb(65, 51, 51);
+}
+
+.rc-slider-track {
+    background-color: #00000000;
+}
+  
+.rc-slider-dot-active {
+    background-color: #9E0600;  
+    border: solid 1px #000000;
+}
+  
+.rc-slider-rail {
+    background-color: #00000000;
+}
+
+*{
+    font-family: "Bebas Neue";
+}
