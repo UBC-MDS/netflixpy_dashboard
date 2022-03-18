@@ -101,7 +101,8 @@ def world_map(cat, rate, year):
     chart = (base_map + points).configure_view(
         strokeWidth = 0
         ).configure_mark(
-            opacity = 0.8).configure(background = transparent)
+            opacity = 0.8
+        ).configure(background = transparent, style=dict(cell=dict(strokeOpacity=0)))
         
     return chart.to_html()
 
@@ -256,11 +257,11 @@ app.layout = dbc.Container([
                     dots = True
                     
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Genres",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                       "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown",
@@ -269,13 +270,14 @@ app.layout = dbc.Container([
 
                         multi=True,
                         style={"background-color": transparent, "border": "0", "color": "black"}
-                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
+                )], style={"border": f"{border_width} solid {color2}",
+                    'border-radius': border_radius}
             ),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Ratings",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                        "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown_ratings",
@@ -300,18 +302,16 @@ app.layout = dbc.Container([
                 srcDoc = world_map(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                    2021),
-                style={'border': '0', 'width': '100%', 'height': '500px'})
-            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "93%", "height": "470px"}),
+                style={'border': '0', 'width': '100%', 'height': '500px', "margin-left": "30px", "margin-top": "20px"})
+            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, 
+                "width": "93%", "height": "470px"}),
 
-            html.Div(style={'padding': 10}),
             dbc.Row([
                 dbc.Col([
                     html.H3("Top 10 directors",
                         style={"background": color1, "color": title_color, 
                                'textAlign': 'center', 'border-radius': border_radius}),
                     html.Div([
-                        html.P("In terms of number of content",
-                               style={"color": title_color, 'textAlign': 'center'}),
                         html.Iframe(
                             id="plot_directors",
                             srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
@@ -323,6 +323,7 @@ app.layout = dbc.Container([
                                 "height": "300px",
                                 "top": "20%",
                                 "left": "70%",
+                                "margin-top": "25px"
                             },
                         ),   
                     ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "height": "300px"})
@@ -361,7 +362,7 @@ app.layout = dbc.Container([
                         ], 
                     style = {"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "120%", "height": "300px"}),
                 ], md=4, style = {})
-            ])             
+            ], style={"margin-top": "20px"})             
         ])
     ])
 ])
