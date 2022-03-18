@@ -106,7 +106,7 @@ def world_map(year):
     return chart.to_html()
 
 
-def plot_hist_duration(type_name, year, cat, bin_num, title):
+def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
     """
     Plots the distribution of movies or TV series.
     
@@ -130,7 +130,8 @@ def plot_hist_duration(type_name, year, cat, bin_num, title):
     altair.vegalite.v4.api.LayerChart
         A barplot conditioned on the type of content (TV/Movie)
     """
-    plot_df = (genres_df[genres_df["genres"].isin(cat)]
+    plot_df = genres_df[genres_df["rating"].isin(rate)]
+    plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
     plot_df = (
         plot_df.groupby(["duration", "type"])
@@ -154,7 +155,7 @@ def plot_hist_duration(type_name, year, cat, bin_num, title):
     return chart.to_html()
 
 
-def plot_directors(cat, year):
+def plot_directors(cat,rate, year):
     """
     Plots the count of movies or TV series by individual directors.
     
@@ -172,8 +173,9 @@ def plot_directors(cat, year):
     """
     click = alt.selection_multi()
 
+    plot_df = df[df["rating"].isin(rate)]
     plot_df = (
-        df[df["genres"].isin(cat)]
+        plot_df[plot_df["genres"].isin(cat)]
         .query("director != 'Missing'")
         .query(f"release_year <= @year")
         .groupby(["director", "country"])
@@ -267,6 +269,7 @@ app.layout = dbc.Container([
                         2021: "2021"},
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
             html.Div(style={'padding': 10}),
+
             html.P("Select Genres",
                 style={"background": color1, "color": title_color,
                        'textAlign': 'center', 'border-radius': border_radius}),
@@ -275,14 +278,27 @@ app.layout = dbc.Container([
                         id="dropdown",
                         options=df.genres.unique().tolist(),
                         value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+
                         multi=True,
                         style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
                 )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
             ),
             html.Div(style={'padding': 10}),
+
             html.P("Select Ratings",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius})],
+                       'textAlign': 'center', 'border-radius': border_radius}),
+            html.Div([
+                dcc.Dropdown(
+                        id="dropdown_ratings",
+                        options=df.rating.unique().tolist(),
+                        value=   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+
+                        multi=True,
+                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
+                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
+            )
+                       ],
         md=4, style={'width': '17%'}),   
         
         
@@ -308,7 +324,9 @@ app.layout = dbc.Container([
                                style={"color": title_color, 'textAlign': 'center'}),
                         html.Iframe(
                             id="plot_directors",
-                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"], 2021),
+                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                                                          2021),
                             style={
                                 "border-width": "1",
                                 "width": "100%",
@@ -335,6 +353,7 @@ app.layout = dbc.Container([
                                                 srcDoc=plot_hist_duration(type_name = 'Movie',
                                                                         year = 2021,
                                                                         cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                                                        rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                                         bin_num = 30, title = "Duration of Movies"
                                                                         )),
                                                                         label='Movie', tab_id='Movie'),
@@ -344,6 +363,7 @@ app.layout = dbc.Container([
                                                 srcDoc=plot_hist_duration(type_name = 'TV Show',
                                                                         year = 2021,
                                                                         cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                                                        rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                                         bin_num = 10, title = "Duration of TV Shows"
                                                                         )),
                                                                         label='TV Show', tab_id='TV Show')
@@ -363,20 +383,23 @@ app.layout = dbc.Container([
      Output("movie_duration", "srcDoc"),
      Output("tv_duration", "srcDoc")],
     [Input("dropdown", "value"),
+    Input("dropdown_ratings", "value"),
     Input('year_slider', 'value')])
 
-def update_output(cat, year):
+def update_output(cat, rate, year):
     map = world_map(year)
-    directors = plot_directors(cat, year)
+    directors = plot_directors(cat, rate,  year)
     movie_hist = plot_hist_duration("Movie",
                                     year,
                                     cat, 
+                                    rate,
                                     bin_num = 30, 
                                     title = "Duration of Movies"
                                     )
     tv_show_hist = plot_hist_duration("TV Show",
                                     year,
                                     cat,
+                                    rate,
                                     bin_num = 10,
                                     title = "Number of Seasons"
                                     )
@@ -387,4 +410,3 @@ def update_output(cat, year):
 
 if __name__ == '__main__':
     app.run_server(debug = True)
-
