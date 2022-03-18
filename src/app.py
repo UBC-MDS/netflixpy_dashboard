@@ -65,8 +65,10 @@ def world_map(cat, rate, year):
     
     plot_df = count_geocoded[count_geocoded["rating"].isin(rate)]
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
-               .query(f"release_year <= @year"))           
-
+               .query(f"release_year == @year")
+               .groupby(["country", "lat", "lon"])
+               .sum()
+               .reset_index())           
     
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
@@ -85,7 +87,7 @@ def world_map(cat, rate, year):
     points = alt.Chart(plot_df).mark_point().encode(
     latitude = "lat",
     longitude = "lon",
-    fill = alt.value("red"),
+    fill = alt.value("#E50914"),
     size = alt.Size("count:Q", 
                     scale = alt.Scale(domain = [0, 70]),
                    legend = None),
@@ -99,7 +101,7 @@ def world_map(cat, rate, year):
     chart = (base_map + points).configure_view(
         strokeWidth = 0
         ).configure_mark(
-            opacity = 0.8)
+            opacity = 0.8).configure(background = transparent)
         
     return chart.to_html()
 
@@ -217,7 +219,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
         html.H1("Netflix Explorer", style={"font-weight": "bold"}),
-        ], md=4, style={"color": color1, "width": "27.5%"}), 
+        ], md=4, style={"color": "#E50914", "width": "27.5%"}), 
         
         dbc.Col([
             dbc.Button(
