@@ -280,7 +280,7 @@ app.layout = dbc.Container([
                         value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
                 )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
             ),
             html.Div(style={'padding': 10}),
@@ -292,10 +292,10 @@ app.layout = dbc.Container([
                 dcc.Dropdown(
                         id="dropdown_ratings",
                         options=df.rating.unique().tolist(),
-                        value=   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                        value=['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
                 )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
             )
                        ],
