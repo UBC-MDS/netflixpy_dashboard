@@ -6,47 +6,53 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import base64
 import io
+import matplotlib
 
 
-
-genres_df = pd.read_csv('data/processed/df.csv')
+df = pd.read_csv("data/processed/processed.csv")
 
 def title_cloud(year, cat):
-    
-    plot_df = (genres_df[genres_df["genres"].isin(cat)]
-                .query(f"release_year <= @year"))
-    
+    """
+    Add docstring
+    """
 
+    plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+    
     words = " ".join(plot_df["title"].tolist())
-
-    word_cloud = WordCloud(collocations = False, background_color = "white").generate(words)
-
+    
+    colormap = matplotlib.colors.LinearSegmentedColormap.from_list("", ['#242020', '#b20710'])
+    word_cloud = WordCloud(collocations = False, 
+                           background_color = "white", colormap = colormap).generate(words)
+    
+    buf = io.BytesIO() 
     plt.figure()
     plt.imshow(word_cloud, interpolation = "bilinear");
     plt.axis("off")
     
-    buf = io.BytesIO()
-    plt.savefig(buf, format = "png", dpi=600, bbox_inches = 'tight', pad_inches = 0)
-    
-    return base64.b64encode(buf.getbuffer()).decode("utf8")
-
-
+    plt.savefig(buf, format = "png", dpi = 600, bbox_inches = "tight", pad_inches = 0)
+    data = base64.b64encode(buf.getbuffer()).decode("utf8")  
+    plt.close()
+    return "data:image/png;base64,{}".format(data)
 
 
 app = Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
+
+server = app.server
 
 app.layout = html.Div([
         html.Div(
             html.Img(
                 id = "image_wc",
-                className = "img-responsive"
+                className = "img-responsive",
+                style = {'height':'30%', 'width':'40%'}
                 )
         ),
 
         dcc.Slider(id = 'year_slider', 
                    min = 1942, 
-                   max = 2021, 
+                   max = 2021,
                    step = 5,
+                   value = 2021,
                    marks = {
                        1942: "1942",
                        1947: "1947",
@@ -87,4 +93,4 @@ def update_output(cat, year):
     return title_cloud(year, cat)
 
 if __name__ == '__main__':
-    app.run_server(debug = True)
+    app.run_server(debug = True) 
