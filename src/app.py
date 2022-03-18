@@ -248,7 +248,7 @@ app.layout = dbc.Container([
                         2021: "2021"},
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
             html.Div(style={'padding': 10}),
-            html.P("Select genres",
+            html.P("Select Genres",
                 style={"background": color1, "color": title_color,
                        'textAlign': 'center', 'border-radius': border_radius}),
             html.Div([
