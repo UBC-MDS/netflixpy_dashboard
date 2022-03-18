@@ -15,10 +15,10 @@ server = app.server
 app.title = 'Netflix Dashboard'
 
 
-def world_map(year):
+def world_map(cat, rate, year):
     """
-    Loads Netflix data and country geocodes, wrangles and merges the two data, 
-    and plots a world map containing the number of movies and TV shows produced in a given year.
+    Merges the processed data with country gecodes and
+    plots a world map containing the number of movies and TV shows produced in a given year, genre and rating.
     
     Parameters
     ----------
@@ -30,19 +30,14 @@ def world_map(year):
     altair.vegalite.v4.api.LayerChart
         A layered Altair chart containing the base world map and the size of number of movies and TV shows produced over the years.
     """
-    
-    # Load in data and geocodes
-    df = pd.read_csv("data/raw/netflix_titles.csv")
-    geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
-    
 
     # Explode "country" since some shows have multiple countries of production
-    movie_exploded = (raw_data.set_index(raw_data.columns.drop("country", 1)
+    movie_exploded = (df.set_index(df.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
                         .stack()
                         .reset_index()
                         .rename(columns = {0:'country'})
-                        .loc[:, raw_data.columns]
+                        .loc[:, df.columns]
     )
 
     # Remove white space
@@ -51,7 +46,7 @@ def world_map(year):
     
     # Get count per country and release year
     count = (pd.DataFrame(movie_exploded.groupby(["country", 
-                                                  "release_year"]).size())
+                                                  "release_year", "genres", "rating"]).size())
         .reset_index()
         .rename(columns = {0 : "count"})
         )
@@ -66,7 +61,14 @@ def world_map(year):
                                           "usa_state_latitude", 
                                           "usa_state_longitude", 
                                           "usa_state"], axis = 1)
-
+    
+    
+    plot_df = count_geocoded[count_geocoded["rating"].isin(rate)]
+    plot_df = (plot_df[plot_df["genres"].isin(cat)]
+               .query(f"release_year == @year")
+               .groupby(["country", "lat", "lon"])
+               .sum()
+               .reset_index())           
     
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
@@ -79,12 +81,13 @@ def world_map(year):
     ).properties(width = 900, 
                  height = 400).configure_view(
                      stroke = None)
+                 
     
     # Shows count size layer
-    points = alt.Chart(count_geocoded[count_geocoded["release_year"] == year]).mark_point().encode(
+    points = alt.Chart(plot_df).mark_point().encode(
     latitude = "lat",
     longitude = "lon",
-    fill = alt.value("red"),
+    fill = alt.value("#E50914"),
     size = alt.Size("count:Q", 
                     scale = alt.Scale(domain = [0, 70]),
                    legend = None),
@@ -93,16 +96,13 @@ def world_map(year):
     tooltip = [alt.Tooltip("country", title = "Country"), 
                alt.Tooltip("release_year:Q", title = "Release Year"),
                alt.Tooltip("count:Q", title = "Count")]
-).properties(
-    title = "Number of Movie and TV show Produced Worldwide"
 )
     
     chart = (base_map + points).configure_view(
         strokeWidth = 0
         ).configure_mark(
-            opacity = 0.8).configure_title(
-                            dy = -20
-) 
+            opacity = 0.8).configure(background = transparent)
+        
     return chart.to_html()
 
 
@@ -155,14 +155,14 @@ def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
     return chart.to_html()
 
 
-def plot_directors(cat,rate, year):
+def plot_directors(cat, rate, year):
     """
     Plots the count of movies or TV series by individual directors.
     
     Parameters
     ----------
     cat: list
-        List of genres we want to filter out from the dataframe.\
+        List of genres we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -218,8 +218,8 @@ app_desc = "APP DESCRIPTION"
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-        html.H1("Netflix Explorer", style={"font-weight": "bold"}),
-        ], md=4, style={"color": color1, "width": "27.5%"}), 
+        html.H1("🎥 Netflix Explorer", style={"font-weight": "bold"}),
+        ], md=4, style={"color": "#E50914", "width": "32%"}), 
         
         dbc.Col([
             dbc.Button(
@@ -248,25 +248,13 @@ app.layout = dbc.Container([
                     min = 1942, 
                     max = 2021, 
                     value = 2021,
-                    step = 5,
+                    step = 1,
                     marks = {
                         1942: "1942",
-                        1947: "1947",
-                        1952: "1952",
-                        1957: "1957",
-                        1962: "1962",
-                        1967: "1967",
-                        1972: "1972",
-                        1977: "1977",
-                        1982: "1982",
-                        1987: "1987",
-                        1992: "1992",
-                        1997: "1997",
-                        2002: "2002",
-                        2007: "2007",
-                        2012: "2012",
-                        2017: "2017",
                         2021: "2021"},
+                    tooltip = {"placement": "bottom", "always_visible": False},
+                    dots = True
+                    
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
             html.Div(style={'padding': 10}),
 
@@ -304,12 +292,14 @@ app.layout = dbc.Container([
         
         dbc.Col([
             html.H3("Movies and TV shows produced worldwide",
-                style={"background": color1,"color": title_color, 
+                style={"background": color1, "color": title_color, 
                        'textAlign': 'center', 'border-radius': border_radius, "width": "93%"}),
             html.Div([
                 html.Iframe(
                 id = "world_map",
-                srcDoc = world_map(year = 2021),
+                srcDoc = world_map(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                                   2021),
                 style={'border': '0', 'width': '100%', 'height': '500px'})
             ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "93%", "height": "470px"}),
 
@@ -326,7 +316,7 @@ app.layout = dbc.Container([
                             id="plot_directors",
                             srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                                     ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-                                                          2021),
+                                                    2021),
                             style={
                                 "border-width": "1",
                                 "width": "100%",
@@ -387,8 +377,8 @@ app.layout = dbc.Container([
     Input('year_slider', 'value')])
 
 def update_output(cat, rate, year):
-    map = world_map(year)
-    directors = plot_directors(cat, rate,  year)
+    map = world_map(cat, rate, year)
+    directors = plot_directors(cat, rate, year)
     movie_hist = plot_hist_duration("Movie",
                                     year,
                                     cat, 
