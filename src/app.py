@@ -251,7 +251,6 @@ title_color = "#ebe8e8"          # general title and text color
 border_radius = "5px"            # rounded corner radius
 border_width = "3px"             # border width
 
-app_desc = "APP DESCRIPTION"
 
 
 app.layout = dbc.Container([ 
@@ -334,7 +333,20 @@ app.layout = dbc.Container([
                         style={"border": color2, "background": f"{color1}95", 'margin-top': "30px"},
                     ),
                     dbc.Popover(
-                        dbc.PopoverBody(app_desc),
+                        [
+                            dbc.PopoverHeader("Welcome to Netflix Explorer!"),
+                            dbc.PopoverBody([
+                                             html.P("This dashboard contains:"), 
+                                             html.P("• The map - Number of movies and TV shows produced worldwide"),
+                                             html.P("• The directors plot - Top number of movies and TV shows produced by directors"),
+                                             html.P("• The durations plots - Durations of movies and TV shows per selected genre")
+                            ]),
+                            dbc.PopoverBody([
+                                html.P("To filter the data displayed:"),
+                                html.P("• Select the desired Year, Genre, and Rating from the side bar")
+                            
+                            ])
+                        ],
                         target="popover-target",
                         trigger="legacy",
                         placement="bottom"
