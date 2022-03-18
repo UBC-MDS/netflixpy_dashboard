@@ -216,8 +216,8 @@ app_desc = "APP DESCRIPTION"
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-        html.H1("Netflix Explorer"),
-        ], md=4, style={"color": color1, "width": "26%"}), 
+        html.H1("Netflix Explorer", style={"font-weight": "bold"}),
+        ], md=4, style={"color": color1, "width": "27.5%"}), 
         
         dbc.Col([
             dbc.Button(
