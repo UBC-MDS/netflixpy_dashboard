@@ -218,8 +218,8 @@ app_desc = "APP DESCRIPTION"
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-        html.H1("Netflix Explorer", style={"font-weight": "bold"}),
-        ], md=4, style={"color": "#E50914", "width": "27.5%"}), 
+        html.H1("🎥 Netflix Explorer", style={"font-weight": "bold"}),
+        ], md=4, style={"color": "#E50914", "width": "32%"}), 
         
         dbc.Col([
             dbc.Button(
@@ -292,7 +292,7 @@ app.layout = dbc.Container([
         
         dbc.Col([
             html.H3("Movies and TV shows produced worldwide",
-                style={"background": color1,"color": title_color, 
+                style={"background": color1, "color": title_color, 
                        'textAlign': 'center', 'border-radius': border_radius, "width": "93%"}),
             html.Div([
                 html.Iframe(
