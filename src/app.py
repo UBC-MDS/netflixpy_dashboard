@@ -210,11 +210,30 @@ title_color = "#ebe8e8"          # general title and text color
 border_radius = "5px"            # rounded corner radius
 border_width = "3px"             # border width
 
+app_desc = "APP DESCRIPTION"
+
 
 app.layout = dbc.Container([
-    dbc.Row(html.Div(
-        html.H1("Netflix Explorer"),
-    ), style={"color": color1}),
+    dbc.Row([
+        dbc.Col([
+        html.H1("Netflix Explorer", style={"font-weight": "bold"}),
+        ], md=4, style={"color": color1, "width": "27.5%"}), 
+        
+        dbc.Col([
+            dbc.Button(
+                "ⓘ",
+                id="popover-target",
+                className="sm",
+                style={"border": color2, "background": f"{color1}95", 'margin-top': "15px"},
+            ),
+            dbc.Popover(
+                dbc.PopoverBody(app_desc),
+                target="popover-target",
+                trigger="legacy",
+                placement="bottom"
+            )
+        ]),
+    ]),    
     
     dbc.Row([
         dbc.Col([
