@@ -1,4 +1,3 @@
-from turtle import color
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Output, Input, State
 from vega_datasets import data
