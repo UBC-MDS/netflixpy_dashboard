@@ -15,7 +15,6 @@ alt.data_transformers.disable_max_rows()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 df = pd.read_csv("data/processed/processed.csv")
-genres_df = pd.read_csv('data/processed/df.csv')
 raw_data = pd.read_csv("data/raw/netflix_titles.csv")
 geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
 server = app.server
@@ -140,7 +139,7 @@ def plot_hist_duration(type_name, year, cat, rate, title):
     altair.vegalite.v4.api.LayerChart
         A barplot conditioned on the type of content (TV/Movie)
     """
-    plot_df = genres_df[genres_df["rating"].isin(rate)]
+    plot_df = df[df["rating"].isin(rate)]
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
     plot_df = plot_df[['genres', 'duration', 'show_id', "type"]].copy().drop_duplicates()
