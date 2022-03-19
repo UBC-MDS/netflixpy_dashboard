@@ -4,6 +4,13 @@ from vega_datasets import data
 import altair as alt
 import pandas as pd
 from altair import datum
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import base64
+import io
+import matplotlib
+from PIL import Image
+import numpy as np
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
@@ -101,7 +108,8 @@ def world_map(cat, rate, year):
     chart = (base_map + points).configure_view(
         strokeWidth = 0
         ).configure_mark(
-            opacity = 0.8).configure(background = transparent)
+            opacity = 0.8
+        ).configure(background = transparent, style=dict(cell=dict(strokeOpacity=0)))
         
     return chart.to_html()
 
@@ -204,6 +212,42 @@ def plot_directors(cat, rate, year):
     )
     return chart.to_html()
 
+
+def title_cloud(year, cat):
+    """
+    Add docstring
+    """
+
+    plot_df = df
+    # prevent error when no genre is selected
+    if len(cat) > 0:
+        plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+    else:
+        plot_df = df.query(f'release_year <= @year')
+    
+    words = " ".join(plot_df["title"].tolist())
+    
+    mask = np.array(Image.open("src/assets/netflixN.png"))
+
+    colormap = matplotlib.colors.LinearSegmentedColormap.from_list("", ['#824d4d', '#b20710', "#ffeded", "#E50914"])
+    word_cloud = WordCloud(collocations = False, 
+                           background_color = "#222222", colormap = colormap, mask=mask).generate(words)
+    
+    buf = io.BytesIO() 
+    plt.figure()
+    plt.imshow(word_cloud, interpolation = "bilinear");
+    plt.axis("off")
+    
+    plt.savefig(buf, format = "png", dpi = 150, bbox_inches = "tight", pad_inches = 0)
+    data = base64.b64encode(buf.getbuffer()).decode("utf8")  
+    plt.close()
+    return "data:image/png;base64,{}".format(data)
+
+
+
+
+
+
 transparent = "#00000000"        # for transparent backgrounds
 color1 = "#9E0600"               # red
 color2 = "#993535"               # border colors
@@ -212,36 +256,25 @@ title_color = "#ebe8e8"          # general title and text color
 border_radius = "5px"            # rounded corner radius
 border_width = "3px"             # border width
 
-app_desc = "APP DESCRIPTION"
 
 
-app.layout = dbc.Container([
+app.layout = dbc.Container([ 
     dbc.Row([
         dbc.Col([
-        html.H1("🎥 Netflix Explorer", style={"font-weight": "bold"}),
-        ], md=4, style={"color": "#E50914", "width": "32%"}), 
-        
-        dbc.Col([
-            dbc.Button(
-                "ⓘ",
-                id="popover-target",
-                className="sm",
-                style={"border": color2, "background": f"{color1}95", 'margin-top': "15px"},
-            ),
-            dbc.Popover(
-                dbc.PopoverBody(app_desc),
-                target="popover-target",
-                trigger="legacy",
-                placement="bottom"
-            )
-        ]),
-    ]),    
-    
-    dbc.Row([
-        dbc.Col([
+            dbc.Col([
+                html.Img(
+                    id = "image_wc",
+                    className = "img-responsive",
+                    style = {'width':'100%'}
+                )
+            ]),
+
+
+
+
             html.P("Select Year",
                 style={"background": color1, "color": title_color,
-                    'textAlign': 'center', 'border-radius': border_radius}),
+                    'textAlign': 'center', 'border-radius': border_radius, "margin-top": "15px"}),
             html.Div([
                 html.Div(style={'padding': 3}),
                 dcc.Slider(id = 'year_slider', 
@@ -256,11 +289,11 @@ app.layout = dbc.Container([
                     dots = True
                     
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Genres",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                       "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown",
@@ -268,22 +301,23 @@ app.layout = dbc.Container([
                         value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
-                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
+                )], style={"border": f"{border_width} solid {color2}",
+                    'border-radius': border_radius}
             ),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Ratings",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                        "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown_ratings",
                         options=df.rating.unique().tolist(),
-                        value=   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                        value=['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
                 )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
             )
                        ],
@@ -291,27 +325,61 @@ app.layout = dbc.Container([
         
         
         dbc.Col([
+            dbc.Row([
+                dbc.Col([
+                html.H1("etflix Explorer", style={"font-weight": "bold", "fontSize":70}),
+                ], md=4, style={"color": "#E50914", "width": "43%"}), 
+                
+                dbc.Col([
+                    dbc.Button(
+                        "ⓘ",
+                        id="popover-target",
+                        className="sm",
+                        style={"border": color2, "background": f"{color1}95", 'margin-top': "30px"},
+                    ),
+                    dbc.Popover(
+                        [
+                            dbc.PopoverHeader("Welcome to Netflix Explorer!"),
+                            dbc.PopoverBody([
+                                             html.P("This dashboard contains:"), 
+                                             html.P("• The map - Number of movies and TV shows produced worldwide"),
+                                             html.P("• The directors plot - Top number of movies and TV shows produced by directors"),
+                                             html.P("• The durations plots - Durations of movies and TV shows per selected genre")
+                            ]),
+                            dbc.PopoverBody([
+                                html.P("To filter the data displayed:"),
+                                html.P("• Select the desired Year, Genre, and Rating from the side bar")
+                            
+                            ])
+                        ],
+                        target="popover-target",
+                        trigger="legacy",
+                        placement="bottom"
+                    )
+                ]),
+            ]),
+
+
+
             html.H3("Movies and TV shows produced worldwide",
                 style={"background": color1, "color": title_color, 
-                       'textAlign': 'center', 'border-radius': border_radius, "width": "93%"}),
+                       'textAlign': 'center', 'border-radius': border_radius, "width": "94.5%"}),
             html.Div([
                 html.Iframe(
                 id = "world_map",
                 srcDoc = world_map(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                    2021),
-                style={'border': '0', 'width': '100%', 'height': '500px'})
-            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "93%", "height": "470px"}),
+                style={'border': '0', 'width': '100%', 'height': '500px', "margin-left": "30px", "margin-top": "20px"})
+            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, 
+                "width": "94.5%", "height": "470px"}),
 
-            html.Div(style={'padding': 10}),
             dbc.Row([
                 dbc.Col([
                     html.H3("Top 10 directors",
                         style={"background": color1, "color": title_color, 
                                'textAlign': 'center', 'border-radius': border_radius}),
                     html.Div([
-                        html.P("In terms of number of content",
-                               style={"color": title_color, 'textAlign': 'center'}),
                         html.Iframe(
                             id="plot_directors",
                             srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
@@ -323,10 +391,11 @@ app.layout = dbc.Container([
                                 "height": "300px",
                                 "top": "20%",
                                 "left": "70%",
+                                "margin-top": "25px"
                             },
                         ),   
                     ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "height": "300px"})
-                ], md=4, style={"width": "54%"}),
+                ], md=4, style={"width": "55%"}),
                 dbc.Col([
                     html.H3("Durations",
                         style={"background": color1, "color": title_color, 
@@ -361,7 +430,12 @@ app.layout = dbc.Container([
                         ], 
                     style = {"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "120%", "height": "300px"}),
                 ], md=4, style = {})
-            ])             
+            ], style={"margin-top": "20px"}),
+
+            
+
+
+
         ])
     ])
 ])
@@ -371,7 +445,8 @@ app.layout = dbc.Container([
     [Output("world_map", "srcDoc"),
      Output("plot_directors", "srcDoc"),
      Output("movie_duration", "srcDoc"),
-     Output("tv_duration", "srcDoc")],
+     Output("tv_duration", "srcDoc"),
+     Output("image_wc", "src")],
     [Input("dropdown", "value"),
     Input("dropdown_ratings", "value"),
     Input('year_slider', 'value')])
@@ -393,8 +468,9 @@ def update_output(cat, rate, year):
                                     bin_num = 10,
                                     title = "Number of Seasons"
                                     )
+    word_cloud = title_cloud(year, cat)
 
-    return map, directors, movie_hist, tv_show_hist
+    return map, directors, movie_hist, tv_show_hist, word_cloud
 
 
 
