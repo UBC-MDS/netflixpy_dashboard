@@ -29,6 +29,10 @@ def world_map(cat, rate, year):
     
     Parameters
     ----------
+    cat: list
+        List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -126,10 +130,10 @@ def plot_hist_duration(type_name, year, cat, rate, title):
         Filter the data based on year that the movie/TV show is released.
     cat: list
         List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     title: string
         The x label of the barplot.
-    plot_title: string
-        The title of the barplot.
         
     Returns
     -------
@@ -165,6 +169,8 @@ def plot_directors(cat, rate, year):
     ----------
     cat: list
         List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -207,11 +213,25 @@ def plot_directors(cat, rate, year):
     return chart.to_html()
 
 
-def title_cloud(year, cat):
+def title_cloud(cat, rate, year):
     """
-    Add docstring
+    Makes a word cloud of movie and TV show titles.
+    
+    Parameters
+    ----------
+    cat: list
+        List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+    
+    returns
+    -------
+    matplotlib.image.AxesImage
+        Image of word cloud containing the movie and TV show titles.
     """
-
+    
     plot_df = df
     # prevent error when no genre is selected
     if len(cat) > 0:
@@ -225,7 +245,7 @@ def title_cloud(year, cat):
 
     colormap = matplotlib.colors.LinearSegmentedColormap.from_list("", ['#824d4d', '#b20710', "#ffeded", "#E50914"])
     word_cloud = WordCloud(collocations = False, 
-                           background_color = "#222222", colormap = colormap, mask=mask).generate(words)
+                           background_color = "#222222", colormap = colormap, mask = mask).generate(words)
     
     buf = io.BytesIO() 
     plt.figure()
@@ -460,7 +480,7 @@ def update_output(cat, rate, year):
                                     rate,
                                     title = "Number of Seasons"
                                     )
-    word_cloud = title_cloud(year, cat)
+    word_cloud = title_cloud(cat, rate, year)
 
     return map, directors, movie_hist, tv_show_hist, word_cloud
 
