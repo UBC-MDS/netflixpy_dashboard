@@ -29,6 +29,10 @@ def world_map(cat, rate, year):
     
     Parameters
     ----------
+    cat: list
+        List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -73,7 +77,7 @@ def world_map(cat, rate, year):
     plot_df = count_geocoded[count_geocoded["rating"].isin(rate)]
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year == @year")
-               .groupby(["country", "lat", "lon"])
+               .groupby(["country", "lat", "lon", "release_year"])
                .sum()
                .reset_index())           
     
@@ -126,10 +130,10 @@ def plot_hist_duration(type_name, year, cat, rate, title):
         Filter the data based on year that the movie/TV show is released.
     cat: list
         List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     title: string
         The x label of the barplot.
-    plot_title: string
-        The title of the barplot.
         
     Returns
     -------
@@ -165,6 +169,8 @@ def plot_directors(cat, rate, year):
     ----------
     cat: list
         List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -207,15 +213,37 @@ def plot_directors(cat, rate, year):
     return chart.to_html()
 
 
-def title_cloud(year, cat):
+def title_cloud(cat, rate, year):
     """
-    Add docstring
+    Makes a word cloud of movie and TV show titles.
+    
+    Parameters
+    ----------
+    cat: list
+        List of genres we want to filter out from the dataframe.
+    rate: list
+        List of ratings we want to filter out from the dataframe.
+    year: int, float
+        Filter the data based on year that the movie/TV show is released.
+    
+    returns
+    -------
+    matplotlib.image.AxesImage
+        Image of word cloud containing the movie and TV show titles.
     """
-
+    
     plot_df = df
-    # prevent error when no genre is selected
-    if len(cat) > 0:
+    # prevent error when no genre and rating is selected
+    if len(cat) > 0 and len(rate) == 0:
         plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+        
+    elif len(cat) == 0 and len(rate) > 0:
+        plot_df = df[df["rating"].isin(rate)].query(f'release_year <= @year')
+        
+    elif len(cat) > 0 and len(rate) > 0:
+        plot_df = df[df["genres"].isin(cat)]
+        plot_df = plot_df[plot_df["rating"].isin(rate)].query(f'release_year <= @year')
+        
     else:
         plot_df = df.query(f'release_year <= @year')
     
@@ -225,7 +253,7 @@ def title_cloud(year, cat):
 
     colormap = matplotlib.colors.LinearSegmentedColormap.from_list("", ['#824d4d', '#b20710', "#ffeded", "#E50914"])
     word_cloud = WordCloud(collocations = False, 
-                           background_color = "#222222", colormap = colormap, mask=mask).generate(words)
+                           background_color = "#222222", colormap = colormap, mask = mask).generate(words)
     
     buf = io.BytesIO() 
     plt.figure()
@@ -292,7 +320,7 @@ app.layout = dbc.Container([
                 dcc.Dropdown(
                         id="dropdown",
                         options=df.genres.unique().tolist(),
-                        value=["International", "Dramas", "Thrillers", "Comedies"],
+                        value=["International", "Dramas", "Thrillers", "Comedies", "Action"],
 
                         multi=True,
                         style={"background-color": transparent, "border": "0", "color": "black"}
@@ -322,7 +350,7 @@ app.layout = dbc.Container([
             dbc.Row([
                 dbc.Col([
                 html.H1("etflix Explorer", style={"font-weight": "bold", "fontSize":70}),
-                ], md=4, style={"color": "#E50914", "width": "43%"}), 
+                ], md=4, style={"color": "#E50914", "width": "88.8%"}), 
                 
                 dbc.Col([
                     dbc.Button(
@@ -336,13 +364,13 @@ app.layout = dbc.Container([
                             dbc.PopoverHeader("Welcome to Netflix Explorer!"),
                             dbc.PopoverBody([
                                              html.P("This dashboard contains:"), 
-                                             html.P("• The map - Number of movies and TV shows produced worldwide"),
-                                             html.P("• The directors plot - Top number of movies and TV shows produced by directors"),
-                                             html.P("• The durations plots - Durations of movies and TV shows per selected genre")
+                                             html.P("🎥 The map - Number of movies and TV shows produced worldwide"),
+                                             html.P("🎥 The directors plot - Top number of movies and TV shows produced by directors"),
+                                             html.P("🎥 The durations plots - Durations of movies and TV shows per selected genre")
                             ]),
                             dbc.PopoverBody([
                                 html.P("To filter the data displayed:"),
-                                html.P("• Select the desired Year, Genre, and Rating from the side bar")
+                                html.P("🎥 Select the desired Year, Genre, and Rating from the side bar")
                             
                             ])
                         ],
@@ -426,9 +454,6 @@ app.layout = dbc.Container([
                 ], md=4, style = {})
             ], style={"margin-top": "20px"}),
 
-            
-
-
 
         ])
     ])
@@ -460,7 +485,7 @@ def update_output(cat, rate, year):
                                     rate,
                                     title = "Number of Seasons"
                                     )
-    word_cloud = title_cloud(year, cat)
+    word_cloud = title_cloud(cat, rate, year)
 
     return map, directors, movie_hist, tv_show_hist, word_cloud
 
