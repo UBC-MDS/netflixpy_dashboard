@@ -11,7 +11,7 @@ import io
 import matplotlib
 from PIL import Image
 import numpy as np
-
+alt.data_transformers.disable_max_rows()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 df = pd.read_csv("data/processed/processed.csv")
@@ -114,7 +114,7 @@ def world_map(cat, rate, year):
     return chart.to_html()
 
 
-def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
+def plot_hist_duration(type_name, year, cat, rate, title):
     """
     Plots the distribution of movies or TV series.
     
@@ -126,8 +126,6 @@ def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
         Filter the data based on year that the movie/TV show is released.
     cat: list
         List of genres we want to filter out from the dataframe.
-    bin_num: int
-        Number of bins in the barplot.
     title: string
         The x label of the barplot.
     plot_title: string
@@ -141,18 +139,14 @@ def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
     plot_df = genres_df[genres_df["rating"].isin(rate)]
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
-    plot_df = (
-        plot_df.groupby(["duration", "type"])
-        .show_id.nunique()
-        .reset_index(name="count")
-    )
-
-    chart = alt.Chart(plot_df).mark_bar().encode(
-        alt.X("duration", bin =alt.Bin(maxbins = bin_num), title = title),    
-        alt.Y('count'),
-        tooltip='count',
-        color = alt.value(color1)
-    ).transform_filter(datum.type == type_name).properties(
+    plot_df = plot_df[['genres', 'duration', 'show_id', "type"]].copy().drop_duplicates()
+    
+    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5).encode(
+        alt.X("duration", title = title),    
+        alt.Y('genres', title=""),
+        color = alt.value(color1),
+        tooltip = 'genres'
+        ).transform_filter(datum.type == type_name).properties(
         width=300,
         height=200
     ).configure(background=transparent
@@ -298,7 +292,7 @@ app.layout = dbc.Container([
                 dcc.Dropdown(
                         id="dropdown",
                         options=df.genres.unique().tolist(),
-                        value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                        value=["International", "Dramas", "Thrillers", "Comedies"],
 
                         multi=True,
                         style={"background-color": transparent, "border": "0", "color": "black"}
@@ -313,7 +307,7 @@ app.layout = dbc.Container([
             html.Div([
                 dcc.Dropdown(
                         id="dropdown_ratings",
-                        options=[i for i in df.rating.unique().tolist() if str(i) not in ['66 min', '84 min', 'nan', '74 min']],
+                        options=[i for i in df.rating.unique().tolist() if str(i) not in ['66 min', '84 min', 'nan', '74 min', 'null']],
                         value=['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
 
                         multi=True,
@@ -367,7 +361,7 @@ app.layout = dbc.Container([
             html.Div([
                 html.Iframe(
                 id = "world_map",
-                srcDoc = world_map(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                srcDoc = world_map(["International", "Dramas", "Thrillers", "Comedies"],
                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                    2021),
                 style={'border': '0', 'width': '100%', 'height': '500px', "margin-left": "30px", "margin-top": "20px"})
@@ -382,7 +376,7 @@ app.layout = dbc.Container([
                     html.Div([
                         html.Iframe(
                             id="plot_directors",
-                            srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                            srcDoc = plot_directors(["International", "Dramas", "Thrillers", "Comedies"],
                                                     ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                     2021),
                             style={
@@ -411,9 +405,9 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'Movie',
                                                                         year = 2021,
-                                                                        cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies"],
                                                                         rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-                                                                        bin_num = 30, title = "Duration of Movies"
+                                                                        title = "Duration of Movies"
                                                                         )),
                                                                         label='Movie', tab_id='Movie'),
                                     dbc.Tab(html.Iframe(
@@ -421,9 +415,9 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'TV Show',
                                                                         year = 2021,
-                                                                        cat = ["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies"],
                                                                         rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-                                                                        bin_num = 10, title = "Duration of TV Shows"
+                                                                        title = "Number of Seasons"
                                                                         )),
                                                                         label='TV Show', tab_id='TV Show')
                             ])
@@ -458,14 +452,12 @@ def update_output(cat, rate, year):
                                     year,
                                     cat, 
                                     rate,
-                                    bin_num = 30, 
                                     title = "Duration of Movies"
                                     )
     tv_show_hist = plot_hist_duration("TV Show",
                                     year,
                                     cat,
                                     rate,
-                                    bin_num = 10,
                                     title = "Number of Seasons"
                                     )
     word_cloud = title_cloud(year, cat)
