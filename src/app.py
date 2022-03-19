@@ -320,7 +320,7 @@ app.layout = dbc.Container([
                 dcc.Dropdown(
                         id="dropdown",
                         options=df.genres.unique().tolist(),
-                        value=["International", "Dramas", "Thrillers", "Comedies"],
+                        value=["International", "Dramas", "Thrillers", "Comedies", "Action", "Romantic", "Sports"],
 
                         multi=True,
                         style={"background-color": transparent, "border": "0", "color": "black"}
@@ -453,9 +453,6 @@ app.layout = dbc.Container([
                     style = {"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "120%", "height": "300px"}),
                 ], md=4, style = {})
             ], style={"margin-top": "20px"}),
-
-            
-
 
 
         ])
