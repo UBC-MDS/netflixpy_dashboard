@@ -11,6 +11,11 @@ across all the plot
 We modified the duration plot by making it a boxplot. This represents the information better
 than the histogram plot.
 
+### Layout 
+
+We implement a unified color theme and layout that is visually appealing.
+In other to ensures better user engagement and interaction with the dashboard.
+
 ### Plot Interactivity
 
 All of the plots contain interactivity. The world map has a tooltip that
