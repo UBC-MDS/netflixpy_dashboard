@@ -13,6 +13,7 @@ RUN pip3 install -r requirements.txt
 # Copy the rest of the codebase into the image
 COPY src/ ./
 COPY data/ ./data
+COPY src/ ./src
 
 
 # Finally, run gunicorn.
