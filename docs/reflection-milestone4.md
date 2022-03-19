@@ -41,7 +41,7 @@ showing the differences in duration type.
 
 ### Differences between DashR and DashPy
 
-There are several differences between the DashR and DashPy implementation that we are hoping to address in the future additions. First, the DashR world map does not include the rating and genre widgets. Second, there is no word cloud of the content titles in the DashR, and third the theme is slightly different than DashPy.
+There are several differences between the DashR and DashPy implementation that we are hoping to address in the future additions. First, there is no word cloud of the content titles in the DashR, and second the theme is slightly different than DashPy.
 
 ### Limitations and Future Additions
 
