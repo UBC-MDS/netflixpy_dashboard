@@ -313,7 +313,7 @@ app.layout = dbc.Container([
             html.Div([
                 dcc.Dropdown(
                         id="dropdown_ratings",
-                        options=df.rating.unique().tolist(),
+                        options=[i for i in df.rating.unique().tolist() if str(i) not in ['66 min', '84 min', 'nan', '74 min']],
                         value=['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
 
                         multi=True,
