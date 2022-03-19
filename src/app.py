@@ -364,13 +364,13 @@ app.layout = dbc.Container([
                             dbc.PopoverHeader("Welcome to Netflix Explorer!"),
                             dbc.PopoverBody([
                                              html.P("This dashboard contains:"), 
-                                             html.P("• The map - Number of movies and TV shows produced worldwide"),
-                                             html.P("• The directors plot - Top number of movies and TV shows produced by directors"),
-                                             html.P("• The durations plots - Durations of movies and TV shows per selected genre")
+                                             html.P("🎥 The map - Number of movies and TV shows produced worldwide"),
+                                             html.P("🎥 The directors plot - Top number of movies and TV shows produced by directors"),
+                                             html.P("🎥 The durations plots - Durations of movies and TV shows per selected genre")
                             ]),
                             dbc.PopoverBody([
                                 html.P("To filter the data displayed:"),
-                                html.P("• Select the desired Year, Genre, and Rating from the side bar")
+                                html.P("🎥 Select the desired Year, Genre, and Rating from the side bar")
                             
                             ])
                         ],
