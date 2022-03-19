@@ -77,7 +77,7 @@ def world_map(cat, rate, year):
     plot_df = count_geocoded[count_geocoded["rating"].isin(rate)]
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year == @year")
-               .groupby(["country", "lat", "lon"])
+               .groupby(["country", "lat", "lon", "release_year"])
                .sum()
                .reset_index())           
     
