@@ -149,10 +149,10 @@ def plot_hist_duration(type_name, year, cat, rate, title):
         color_list.append(color1)
 
 
-    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5, color=color1).encode(
+    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5, color="black").encode(
         alt.X("duration", title = title),    
         alt.Y('genres', title=""),
-        color = alt.Color("genres", scale=alt.Scale(domain=genre_names, range=color_list), legend=None),
+        color = alt.value(color1),
         tooltip = 'genres'
         ).transform_filter(datum.type == type_name).properties(
         width=260,
