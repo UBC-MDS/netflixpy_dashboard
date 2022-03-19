@@ -62,4 +62,7 @@ genres_dict = {
 
 mod_df['genres'] = mod_df['genres'].replace(genres_dict)
 mod_df['genres'].unique()
+
+mod_df['duration'] = mod_df.duration.str.extract('(\d+)').astype(float)
+
 mod_df.to_csv("data/processed/processed.csv", index=False)
