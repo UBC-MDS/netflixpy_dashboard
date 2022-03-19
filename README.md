@@ -6,7 +6,7 @@ To address this issue, we built a data visualization dashboard that allows our t
 
 
 ## Usage
-The link to the app is [here](https://dsci-532-netflixpy.herokuapp.com/)
+The link to the app is [here](https://dsci-532-netflixpy.herokuapp.com/).
 
 Usage examples:
 - Select genre categories from the side bar to filter the plots by genres.
