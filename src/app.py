@@ -388,7 +388,7 @@ app.layout = dbc.Container([
             html.Div([
                 html.Iframe(
                 id = "world_map",
-                srcDoc = world_map(["International", "Dramas", "Thrillers", "Comedies"],
+                srcDoc = world_map(["International", "Dramas", "Thrillers", "Comedies", "Action"],
                                    ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                    2021),
                 style={'border': '0', 'width': '100%', 'height': '500px', "margin-left": "30px", "margin-top": "20px"})
@@ -403,7 +403,7 @@ app.layout = dbc.Container([
                     html.Div([
                         html.Iframe(
                             id="plot_directors",
-                            srcDoc = plot_directors(["International", "Dramas", "Thrillers", "Comedies"],
+                            srcDoc = plot_directors(["International", "Dramas", "Thrillers", "Comedies", "Action"],
                                                     ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                     2021),
                             style={
@@ -432,7 +432,7 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'Movie',
                                                                         year = 2021,
-                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies"],
+                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies", "Action"],
                                                                         rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                                         title = "Duration of Movies"
                                                                         )),
@@ -442,7 +442,7 @@ app.layout = dbc.Container([
                                                 style = {"width": "400px", "height": "320px"} ,
                                                 srcDoc=plot_hist_duration(type_name = 'TV Show',
                                                                         year = 2021,
-                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies"],
+                                                                        cat = ["International", "Dramas", "Thrillers", "Comedies", "Action"],
                                                                         rate =   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
                                                                         title = "Number of Seasons"
                                                                         )),
