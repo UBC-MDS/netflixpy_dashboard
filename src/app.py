@@ -1,3 +1,4 @@
+from turtle import color
 import dash_bootstrap_components as dbc
 from dash import Dash, html, dcc, Output, Input, State
 from vega_datasets import data
@@ -141,13 +142,20 @@ def plot_hist_duration(type_name, year, cat, rate, title):
                .query(f"release_year <= @year"))
     plot_df = plot_df[['genres', 'duration', 'show_id', "type"]].copy().drop_duplicates()
     
-    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5).encode(
+    
+    genre_names = plot_df.genres.unique()
+    color_list = []
+    for _ in genre_names:
+        color_list.append(color1)
+
+
+    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5, color=color1).encode(
         alt.X("duration", title = title),    
         alt.Y('genres', title=""),
-        color = alt.value(color1),
+        color = alt.Color("genres", scale=alt.Scale(domain=genre_names, range=color_list), legend=None),
         tooltip = 'genres'
         ).transform_filter(datum.type == type_name).properties(
-        width=300,
+        width=260,
         height=200
     ).configure(background=transparent
     ).configure_axis(
@@ -452,7 +460,7 @@ def update_output(cat, rate, year):
                                     year,
                                     cat, 
                                     rate,
-                                    title = "Duration of Movies"
+                                    title = "Duration of Movies (minutes)"
                                     )
     tv_show_hist = plot_hist_duration("TV Show",
                                     year,
