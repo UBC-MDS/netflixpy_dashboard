@@ -5,3 +5,7 @@ dash==2.1.0
 dash_bootstrap_components
 vega-datasets==0.9.0
 jsonschema==3.0.0
+wordcloud==1.8.1
+matplotlib==3.5.1
+numpy
+# PIL
