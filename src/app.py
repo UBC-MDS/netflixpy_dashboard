@@ -4,6 +4,13 @@ from vega_datasets import data
 import altair as alt
 import pandas as pd
 from altair import datum
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import base64
+import io
+import matplotlib
+from PIL import Image
+import numpy as np
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
@@ -15,10 +22,10 @@ server = app.server
 app.title = 'Netflix Dashboard'
 
 
-def world_map(year):
+def world_map(cat, rate, year):
     """
-    Loads Netflix data and country geocodes, wrangles and merges the two data, 
-    and plots a world map containing the number of movies and TV shows produced in a given year.
+    Merges the processed data with country gecodes and
+    plots a world map containing the number of movies and TV shows produced in a given year, genre and rating.
     
     Parameters
     ----------
@@ -30,19 +37,14 @@ def world_map(year):
     altair.vegalite.v4.api.LayerChart
         A layered Altair chart containing the base world map and the size of number of movies and TV shows produced over the years.
     """
-    
-    # Load in data and geocodes
-    df = pd.read_csv("data/raw/netflix_titles.csv")
-    geocodes = pd.read_csv("data/raw/world_country_latitude_and_longitude_values.csv")
-    
 
     # Explode "country" since some shows have multiple countries of production
-    movie_exploded = (raw_data.set_index(raw_data.columns.drop("country", 1)
+    movie_exploded = (df.set_index(df.columns.drop("country", 1)
                                         .tolist()).country.str.split(',', expand = True)
                         .stack()
                         .reset_index()
                         .rename(columns = {0:'country'})
-                        .loc[:, raw_data.columns]
+                        .loc[:, df.columns]
     )
 
     # Remove white space
@@ -51,7 +53,7 @@ def world_map(year):
     
     # Get count per country and release year
     count = (pd.DataFrame(movie_exploded.groupby(["country", 
-                                                  "release_year"]).size())
+                                                  "release_year", "genres", "rating"]).size())
         .reset_index()
         .rename(columns = {0 : "count"})
         )
@@ -66,7 +68,14 @@ def world_map(year):
                                           "usa_state_latitude", 
                                           "usa_state_longitude", 
                                           "usa_state"], axis = 1)
-
+    
+    
+    plot_df = count_geocoded[count_geocoded["rating"].isin(rate)]
+    plot_df = (plot_df[plot_df["genres"].isin(cat)]
+               .query(f"release_year == @year")
+               .groupby(["country", "lat", "lon"])
+               .sum()
+               .reset_index())           
     
     # Base map layer
     source = alt.topo_feature(data.world_110m.url, 'countries')
@@ -79,12 +88,13 @@ def world_map(year):
     ).properties(width = 900, 
                  height = 400).configure_view(
                      stroke = None)
+                 
     
     # Shows count size layer
-    points = alt.Chart(count_geocoded[count_geocoded["release_year"] == year]).mark_point().encode(
+    points = alt.Chart(plot_df).mark_point().encode(
     latitude = "lat",
     longitude = "lon",
-    fill = alt.value("red"),
+    fill = alt.value("#E50914"),
     size = alt.Size("count:Q", 
                     scale = alt.Scale(domain = [0, 70]),
                    legend = None),
@@ -93,16 +103,14 @@ def world_map(year):
     tooltip = [alt.Tooltip("country", title = "Country"), 
                alt.Tooltip("release_year:Q", title = "Release Year"),
                alt.Tooltip("count:Q", title = "Count")]
-).properties(
-    title = "Number of Movie and TV show Produced Worldwide"
 )
     
     chart = (base_map + points).configure_view(
         strokeWidth = 0
         ).configure_mark(
-            opacity = 0.8).configure_title(
-                            dy = -20
-) 
+            opacity = 0.8
+        ).configure(background = transparent, style=dict(cell=dict(strokeOpacity=0)))
+        
     return chart.to_html()
 
 
@@ -155,14 +163,14 @@ def plot_hist_duration(type_name, year, cat, rate, bin_num, title):
     return chart.to_html()
 
 
-def plot_directors(cat,rate, year):
+def plot_directors(cat, rate, year):
     """
     Plots the count of movies or TV series by individual directors.
     
     Parameters
     ----------
     cat: list
-        List of genres we want to filter out from the dataframe.\
+        List of genres we want to filter out from the dataframe.
     year: int, float
         Filter the data based on year that the movie/TV show is released.
         
@@ -204,6 +212,42 @@ def plot_directors(cat,rate, year):
     )
     return chart.to_html()
 
+
+def title_cloud(year, cat):
+    """
+    Add docstring
+    """
+
+    plot_df = df
+    # prevent error when no genre is selected
+    if len(cat) > 0:
+        plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+    else:
+        plot_df = df.query(f'release_year <= @year')
+    
+    words = " ".join(plot_df["title"].tolist())
+    
+    mask = np.array(Image.open("src/assets/netflixN.png"))
+
+    colormap = matplotlib.colors.LinearSegmentedColormap.from_list("", ['#824d4d', '#b20710', "#ffeded", "#E50914"])
+    word_cloud = WordCloud(collocations = False, 
+                           background_color = "#222222", colormap = colormap, mask=mask).generate(words)
+    
+    buf = io.BytesIO() 
+    plt.figure()
+    plt.imshow(word_cloud, interpolation = "bilinear");
+    plt.axis("off")
+    
+    plt.savefig(buf, format = "png", dpi = 150, bbox_inches = "tight", pad_inches = 0)
+    data = base64.b64encode(buf.getbuffer()).decode("utf8")  
+    plt.close()
+    return "data:image/png;base64,{}".format(data)
+
+
+
+
+
+
 transparent = "#00000000"        # for transparent backgrounds
 color1 = "#9E0600"               # red
 color2 = "#993535"               # border colors
@@ -213,47 +257,43 @@ border_radius = "5px"            # rounded corner radius
 border_width = "3px"             # border width
 
 
-app.layout = dbc.Container([
-    dbc.Row(html.Div(
-        html.H1("Netflix Explorer"),
-    ), style={"color": color1}),
-    
+
+app.layout = dbc.Container([ 
     dbc.Row([
         dbc.Col([
+            dbc.Col([
+                html.Img(
+                    id = "image_wc",
+                    className = "img-responsive",
+                    style = {'width':'100%'}
+                )
+            ]),
+
+
+
+
             html.P("Select Year",
                 style={"background": color1, "color": title_color,
-                    'textAlign': 'center', 'border-radius': border_radius}),
+                    'textAlign': 'center', 'border-radius': border_radius, "margin-top": "15px"}),
             html.Div([
                 html.Div(style={'padding': 3}),
                 dcc.Slider(id = 'year_slider', 
                     min = 1942, 
                     max = 2021, 
                     value = 2021,
-                    step = 5,
+                    step = 1,
                     marks = {
                         1942: "1942",
-                        1947: "1947",
-                        1952: "1952",
-                        1957: "1957",
-                        1962: "1962",
-                        1967: "1967",
-                        1972: "1972",
-                        1977: "1977",
-                        1982: "1982",
-                        1987: "1987",
-                        1992: "1992",
-                        1997: "1997",
-                        2002: "2002",
-                        2007: "2007",
-                        2012: "2012",
-                        2017: "2017",
                         2021: "2021"},
+                    tooltip = {"placement": "bottom", "always_visible": False},
+                    dots = True
+                    
                    )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Genres",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                       "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown",
@@ -261,22 +301,23 @@ app.layout = dbc.Container([
                         value=["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
-                )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
+                )], style={"border": f"{border_width} solid {color2}",
+                    'border-radius': border_radius}
             ),
-            html.Div(style={'padding': 10}),
 
             html.P("Select Ratings",
                 style={"background": color1, "color": title_color,
-                       'textAlign': 'center', 'border-radius': border_radius}),
+                       'textAlign': 'center', 'border-radius': border_radius,
+                        "margin-top": "15px"}),
             html.Div([
                 dcc.Dropdown(
                         id="dropdown_ratings",
-                        options=[i for i in df.rating.unique().tolist() if str(i) not in ['74 min', '84 min', '66 min', 'nan']],
-                        value=   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                        options=[i for i in df.rating.unique().tolist() if str(i) not in ['66 min', '84 min', 'nan', '74 min']],
+                        value=['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
 
                         multi=True,
-                        style={"background-color": transparent, "border": "0", "color": "black", "label-color": "black"}
+                        style={"background-color": transparent, "border": "0", "color": "black"}
                 )], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius}
             )
                        ],
@@ -284,40 +325,77 @@ app.layout = dbc.Container([
         
         
         dbc.Col([
+            dbc.Row([
+                dbc.Col([
+                html.H1("etflix Explorer", style={"font-weight": "bold", "fontSize":70}),
+                ], md=4, style={"color": "#E50914", "width": "43%"}), 
+                
+                dbc.Col([
+                    dbc.Button(
+                        "ⓘ",
+                        id="popover-target",
+                        className="sm",
+                        style={"border": color2, "background": f"{color1}95", 'margin-top': "30px"},
+                    ),
+                    dbc.Popover(
+                        [
+                            dbc.PopoverHeader("Welcome to Netflix Explorer!"),
+                            dbc.PopoverBody([
+                                             html.P("This dashboard contains:"), 
+                                             html.P("• The map - Number of movies and TV shows produced worldwide"),
+                                             html.P("• The directors plot - Top number of movies and TV shows produced by directors"),
+                                             html.P("• The durations plots - Durations of movies and TV shows per selected genre")
+                            ]),
+                            dbc.PopoverBody([
+                                html.P("To filter the data displayed:"),
+                                html.P("• Select the desired Year, Genre, and Rating from the side bar")
+                            
+                            ])
+                        ],
+                        target="popover-target",
+                        trigger="legacy",
+                        placement="bottom"
+                    )
+                ]),
+            ]),
+
+
+
             html.H3("Movies and TV shows produced worldwide",
-                style={"background": color1,"color": title_color, 
-                       'textAlign': 'center', 'border-radius': border_radius, "width": "93%"}),
+                style={"background": color1, "color": title_color, 
+                       'textAlign': 'center', 'border-radius': border_radius, "width": "94.5%"}),
             html.Div([
                 html.Iframe(
                 id = "world_map",
-                srcDoc = world_map(year = 2021),
-                style={'border': '0', 'width': '100%', 'height': '500px'})
-            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "93%", "height": "470px"}),
+                srcDoc = world_map(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
+                                   ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
+                                   2021),
+                style={'border': '0', 'width': '100%', 'height': '500px', "margin-left": "30px", "margin-top": "20px"})
+            ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, 
+                "width": "94.5%", "height": "470px"}),
 
-            html.Div(style={'padding': 10}),
             dbc.Row([
                 dbc.Col([
                     html.H3("Top 10 directors",
                         style={"background": color1, "color": title_color, 
                                'textAlign': 'center', 'border-radius': border_radius}),
                     html.Div([
-                        html.P("In terms of number of content",
-                               style={"color": title_color, 'textAlign': 'center'}),
                         html.Iframe(
                             id="plot_directors",
                             srcDoc = plot_directors(["International", "Dramas", "Crime TV Shows", "Reality TV", "Comedies"],
                                                     ['PG-13','TV-MA','PG','TV-14','TV-PG','TV-Y','R','TV-G','G','NC-17','NR'], 
-                                                          2021),
+                                                    2021),
                             style={
                                 "border-width": "1",
                                 "width": "100%",
                                 "height": "300px",
                                 "top": "20%",
                                 "left": "70%",
+                                "margin-top": "25px"
                             },
                         ),   
                     ], style={"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "height": "300px"})
-                ], md=4, style={"width": "54%"}),
+                ], md=4, style={"width": "55%"}),
                 dbc.Col([
                     html.H3("Durations",
                         style={"background": color1, "color": title_color, 
@@ -352,7 +430,12 @@ app.layout = dbc.Container([
                         ], 
                     style = {"border": f"{border_width} solid {color2}", 'border-radius': border_radius, "width": "120%", "height": "300px"}),
                 ], md=4, style = {})
-            ])             
+            ], style={"margin-top": "20px"}),
+
+            
+
+
+
         ])
     ])
 ])
@@ -362,14 +445,15 @@ app.layout = dbc.Container([
     [Output("world_map", "srcDoc"),
      Output("plot_directors", "srcDoc"),
      Output("movie_duration", "srcDoc"),
-     Output("tv_duration", "srcDoc")],
+     Output("tv_duration", "srcDoc"),
+     Output("image_wc", "src")],
     [Input("dropdown", "value"),
     Input("dropdown_ratings", "value"),
     Input('year_slider', 'value')])
 
 def update_output(cat, rate, year):
-    map = world_map(year)
-    directors = plot_directors(cat, rate,  year)
+    map = world_map(cat, rate, year)
+    directors = plot_directors(cat, rate, year)
     movie_hist = plot_hist_duration("Movie",
                                     year,
                                     cat, 
@@ -384,8 +468,9 @@ def update_output(cat, rate, year):
                                     bin_num = 10,
                                     title = "Number of Seasons"
                                     )
+    word_cloud = title_cloud(year, cat)
 
-    return map, directors, movie_hist, tv_show_hist
+    return map, directors, movie_hist, tv_show_hist, word_cloud
 
 
 
