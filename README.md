@@ -10,6 +10,7 @@ The link to the app is [here](https://dsci-532-netflixpy.herokuapp.com/)
 
 Usage examples:
 - Select genre categories from the side bar to filter the plots by genres.
+- Select rating categories from the side bar to filter the plots by rating.
 - Use the slider on the top of the page to view movie and TV show data throughout the years.
 - Click on the Movie or TV shows tabs to view plots on movie durations.
 
