@@ -218,7 +218,12 @@ def title_cloud(year, cat):
     Add docstring
     """
 
-    plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+    plot_df = df
+    # prevent error when no genre is selected
+    if len(cat) > 0:
+        plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+    else:
+        plot_df = df.query(f'release_year <= @year')
     
     words = " ".join(plot_df["title"].tolist())
     
