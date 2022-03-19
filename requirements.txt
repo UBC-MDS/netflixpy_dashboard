@@ -8,4 +8,4 @@ jsonschema==3.0.0
 wordcloud==1.8.1
 matplotlib==3.5.1
 numpy
-PIL
+# PIL
