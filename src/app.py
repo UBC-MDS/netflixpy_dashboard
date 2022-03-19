@@ -141,15 +141,8 @@ def plot_hist_duration(type_name, year, cat, rate, title):
     plot_df = (plot_df[plot_df["genres"].isin(cat)]
                .query(f"release_year <= @year"))
     plot_df = plot_df[['genres', 'duration', 'show_id', "type"]].copy().drop_duplicates()
-    
-    
-    genre_names = plot_df.genres.unique()
-    color_list = []
-    for _ in genre_names:
-        color_list.append(color1)
-
-
-    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5, color="black").encode(
+   
+    chart = alt.Chart(plot_df).mark_boxplot(extent=2.5, color="#752516").encode(
         alt.X("duration", title = title),    
         alt.Y('genres', title=""),
         color = alt.value(color1),
