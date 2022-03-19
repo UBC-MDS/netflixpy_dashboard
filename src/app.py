@@ -233,9 +233,17 @@ def title_cloud(cat, rate, year):
     """
     
     plot_df = df
-    # prevent error when no genre is selected
-    if len(cat) > 0:
+    # prevent error when no genre and rating is selected
+    if len(cat) > 0 and len(rate) == 0:
         plot_df = df[df["genres"].isin(cat)].query(f'release_year <= @year')
+        
+    elif len(cat) == 0 and len(rate) > 0:
+        plot_df = df[df["rating"].isin(rate)].query(f'release_year <= @year')
+        
+    elif len(cat) > 0 and len(rate) > 0:
+        plot_df = df[df["genres"].isin(cat)]
+        plot_df = plot_df[plot_df["rating"].isin(rate)].query(f'release_year <= @year')
+        
     else:
         plot_df = df.query(f'release_year <= @year')
     
